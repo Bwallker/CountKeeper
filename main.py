@@ -9,12 +9,14 @@ with open ("config.json", "r") as json_config_file:
 TOKEN = configData['BOT_TOKEN']
 GUILD_ID = int(configData['GUILD_ID'])
 PREFIX = configData['PREFIX']
-PLEB_ID = configData['ROLE1_ID']
-BOT_ID = configData['ROLE2_ID']
+PLEB_ID = int(configData['ROLE1_ID'])
+BOT_ID = int(configData['ROLE2_ID'])
 BOT_CHANNEL_ID = int(configData['BOT_CHANNEL_ID'])
 PLEB_CHANNEL_ID = int(configData['PLEB_CHANNEL_ID'])
 ROLELESS_CHANNEL_ID = int(configData['ROLELESS_CHANNEL_ID'])
-bot = commands.Bot(command_prefix=PREFIX)
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 BOT_CHANNEL = None
 PLEB_CHANNEL = None
 ROLELESS_CHANNEL = None
@@ -43,6 +45,11 @@ async def on_ready():
     print(f'{bot.user} has connected to Discord!')
     print(f'Server name is {guild.name} and id is {guild.id}')
     print('Standing by')
+def testFunc():
+    global GUILD
+
+
+
 def calculateChannels(member, mode):
     global GUILD, BOT_CHANNEL, PLEB_CHANNEL, ROLELESS_CHANNEL
     if (mode == "member left"):
@@ -55,25 +62,19 @@ def calculateChannels(member, mode):
         print('Forced update commencing')
 
     print('updating channels...')
-
     plebAmount = 0
     botAmount = 0
     allMembers = GUILD.member_count
-    roleLessAmount = 0
     print(f'All members: {allMembers}')
     for member in GUILD.members:
-        roleLessCheck = 0
         for role in member.roles:
             if role.id == PLEB_ID:
-                roleLessCheck = 1
-                plebAmount+=1
+                plebAmount += 1
             if role.id == BOT_ID:
-                roleLessCheck = 1
-                botAmount+=1
-            if roleLessCheck == 0:
-                roleLessAmount+=1
+                botAmount += 1
     print(f'Plebs: {plebAmount}')
     print(f'Bots: {botAmount}')
+    roleLessAmount = allMembers - plebAmount - botAmount
     print(f'Roleless: {roleLessAmount}')
     botTemp = "Bottar: " + str(botAmount)
     plebTemp = "Pöblar: " + str(plebAmount)
@@ -115,4 +116,13 @@ async def forceUpdate(ctx):
     await ROLELESS_CHANNEL.edit(name=roleLessTemp)
     await ctx.send("Channels updated!")
     print('Channels updated!')
+@bot.command(name='listMembers')
+async def listMembers(ctx):
+    global GUILD
+    GUILD.fetch_members()
+    for member in GUILD.members:
+        await ctx.send(member)
+        print(member)
+
+
 bot.run(TOKEN)
