@@ -14,6 +14,7 @@ BOT_ID = configData['ROLE2_ID']
 BOT_CHANNEL_ID = configData['BOT_CHANNEL_ID']
 PLEB_CHANNEL_ID = configData['PLEB_CHANNEL_ID']
 ROLELESS_CHANNEL_ID = configData['ROLELESS_CHANNEL_ID']
+TOTAL_CHANNEL_ID = configData['TOTAL_CHANNEL_ID']
 intents = discord.Intents.default()
 intents.members = True
 intents.presences = True
@@ -21,12 +22,13 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 BOT_CHANNEL = None
 PLEB_CHANNEL = None
 ROLELESS_CHANNEL = None
+TOTAL_CHANNEL = None
 GUILD = None
 
 
 @bot.event
 async def on_ready():
-    global GUILD, BOT_CHANNEL, BOT_CHANNEL_ID, PLEB_CHANNEL, PLEB_CHANNEL_ID, ROLELESS_CHANNEL, ROLELESS_CHANNEL_ID
+    global GUILD, BOT_CHANNEL, BOT_CHANNEL_ID, PLEB_CHANNEL, PLEB_CHANNEL_ID, ROLELESS_CHANNEL, ROLELESS_CHANNEL_ID, TOTAL_CHANNEL, TOTAL_CHANNEL_ID
     with open("variables.json", 'r') as jsonfile:
         variablesJson = json.load(jsonfile)
         jsonfile.close()
@@ -52,14 +54,17 @@ async def on_ready():
         elif channel.id == ROLELESS_CHANNEL_ID:
             ROLELESS_CHANNEL = channel
             print(ROLELESS_CHANNEL)
-
+        elif channel.id == TOTAL_CHANNEL_ID:
+            TOTAL_CHANNEL = channel
+            print(TOTAL_CHANNEL)
 
     print(f'{bot.user} has connected to Discord!')
     print(f'Server name is {guild.name} and id is {guild.id}')
     print('Standing by')
 
-async def calculateChannels(member, mode, ctx):
-    global GUILD, BOT_CHANNEL, PLEB_CHANNEL, ROLELESS_CHANNEL
+def calculateChannels(member, mode, ctx):
+    global GUILD, BOT_CHANNEL, PLEB_CHANNEL, ROLELESS_CHANNEL, TOTAL_CHANNEL
+    print("entered calculate channels func")
     if (mode == "member left"):
         print(f'{member} left the server!')
 
@@ -69,6 +74,11 @@ async def calculateChannels(member, mode, ctx):
     elif (mode == "forced update"):
         print('Forced update commencing')
 
+    elif (mode == "role changed"):
+        print(f'{member} updated a role')
+
+    elif (mode == "startup"):
+        print("initializing channels")
     print('updating channels...')
     plebAmount = 0
     botAmount = 0
@@ -87,25 +97,63 @@ async def calculateChannels(member, mode, ctx):
     botTemp = "Bottar: " + str(botAmount)
     plebTemp = "Pöblar: " + str(plebAmount)
     roleLessTemp = "Utan roller: " + str(roleLessAmount)
+    totalTemp = "Alla medlemmar: " + str(allMembers)
+    returnArray = [botTemp, plebTemp, roleLessTemp, totalTemp]
+    return returnArray
+
+
+@bot.event
+async def on_member_update(before, after):
+    global BOT_CHANNEL, PLEB_CHANNEL, ROLELESS_CHANNEL, TOTAL_CHANNEL
+    if (before.roles != after.roles):
+        returnArray = calculateChannels(after, "role changed", None)
+        botTemp = returnArray[0]
+        plebTemp = returnArray[1]
+        roleLessTemp = returnArray[2]
+        totalTemp = returnArray[3]
+        await BOT_CHANNEL.edit(name=botTemp)
+        await PLEB_CHANNEL.edit(name=plebTemp)
+        await ROLELESS_CHANNEL.edit(name=roleLessTemp)
+        await TOTAL_CHANNEL.edit(name=totalTemp)
+        print ("Channels updated!")
+@bot.event
+async def on_member_join(member):
+    returnArray = calculateChannels(member, "member joined", None)
+    botTemp = returnArray[0]
+    plebTemp = returnArray[1]
+    roleLessTemp = returnArray[2]
+    totalTemp = returnArray[3]
     await BOT_CHANNEL.edit(name=botTemp)
     await PLEB_CHANNEL.edit(name=plebTemp)
     await ROLELESS_CHANNEL.edit(name=roleLessTemp)
-    if (mode == "forced update"):
-        await ctx.send("Channels updated!")
+    await TOTAL_CHANNEL.edit(name=totalTemp)
     print ("Channels updated!")
-
-
-
-async def on_member_join(member):
-    calculateChannels(member, "member joined", None)
-
+@bot.event
 async def on_member_remove(member):
-    calculateChannels(member, "member left", None)
+    returnArray = calculateChannels(member, "member left", None)
+    botTemp = returnArray[0]
+    plebTemp = returnArray[1]
+    roleLessTemp = returnArray[2]
+    totalTemp = returnArray[3]
+    await BOT_CHANNEL.edit(name=botTemp)
+    await PLEB_CHANNEL.edit(name=plebTemp)
+    await ROLELESS_CHANNEL.edit(name=roleLessTemp)
+    await TOTAL_CHANNEL.edit(name=totalTemp)
+    print ("Channels updated!")
 
 @bot.command(name='forceUpdate',help='Forces an update to channel names')
 async def forceUpdate(ctx):
-    calculateChannels(None, "forced update", ctx)
-
+    returnArray = calculateChannels(None, "forced update", ctx)
+    botTemp = returnArray[0]
+    plebTemp = returnArray[1]
+    roleLessTemp = returnArray[2]
+    totalTemp = returnArray[3]
+    await BOT_CHANNEL.edit(name=botTemp)
+    await PLEB_CHANNEL.edit(name=plebTemp)
+    await ROLELESS_CHANNEL.edit(name=roleLessTemp)
+    await TOTAL_CHANNEL.edit(name=totalTemp)
+    await ctx.send("Channels updated!")
+    print ("Channels updated!")
 @bot.command(name='listMembers')
 async def listMembers(ctx):
     global GUILD
@@ -120,7 +168,7 @@ async def prefixChange(ctx, args):
     with open(PATH_TO_JSON, 'r') as jsonfile:
         json_content = json.load(jsonfile)
         jsonfile.close()
-    json_content["PREFIX"] = str(args)
+    json_content["PREFIX"] = args
     with open (PATH_TO_JSON, 'w') as json_variable_file:
         json.dump(json_content, json_variable_file, indent=4)
         json_variable_file.close()
