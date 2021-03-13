@@ -388,9 +388,4 @@ async def editHelp(ctx, error):
         print(error)
     else:
         raise error
-@bot.command(name="@Test")
-async def test(ctx, arg):
-    arg = arg[3:-1]
-    print(arg)
-    await ctx.send(arg)
 bot.run(TOKEN)
