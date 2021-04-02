@@ -212,16 +212,20 @@ async def on_guild_join(guild):
     result = getPrefix(guild.id)
     if result is None:
         addPrefix(guild.id)
+    print(f"Bot joined guild {guild.name} (ID:) {guild.id}")
 
+@bot.event
+async def on_guild_leave(guild):
+    print(f"Bot left guild {guild.name} (ID:) {guild.id}")
 
 @bot.listen('on_message')
 async def on_message(msg):
     if not msg.mentions:
         return
-    if msg.mentions[0] == bot.user:
-        prefix = getPrefix(msg.guild.id)
-        await msg.channel.send("My prefix for this server is: " + prefix)
-
+    for mention in msg.mentions:
+        if mention == bot.user:
+            prefix = getPrefix(msg.guild.id)
+            await msg.channel.send("My prefix for this server is: " + prefix)
 @bot.event
 async def on_member_update(before, after):
     if before.roles != after.roles:
@@ -310,7 +314,7 @@ async def create(ctx, name, role):
 async def createHelp(ctx, error):
     prefix = getPrefix(ctx.guild.id)
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f'To create a counting channel you must supply a name and a role as arguments,\n\n so if you want to create a channel named Everyone: and have it track the @everyone role then enter {prefix}create "Everyone: 1" "@everyone".\n\n Make note of the 1 that I included in the name. The bot will change the first number in the name of your channel when it is updating it, so it is important that you include a number in your name at the location that you want your tracking number at\n\nNOTE: The roles you wish to track must be pinged!!!')
+        await ctx.send(f'To create a counting channel you must supply a name and a role as arguments,\n\n so if you want to create a channel named Everyone: and have it track the @everyone role then enter {prefix}create "Everyone: 1" "everyone".\n\n Make note of the 1 that I included in the name. The bot will change the first number in the name of your channel when it is updating it, so it is important that you include a number in your name at the location that you want your tracking number at\n\nNOTE: The roles you wish to track must be pinged!!!\n\nNote2: If you wish to track the @everyone role or track people without any roles then use "everyone" or "norole" instead of pinging a role')
         print(error)
     elif isinstance(error, commands.BadArgument):
         await ctx.send(f'The role you included as an argument is invalid')
@@ -343,7 +347,7 @@ def roleValidityChecker(ctx, input):
     return False
 
 @bot.command(name="edit", help="Changes what role a channel tracks")
-async def edit(ctx, name, role):
+async def edit(ctx, name, role, newName):
     name = str(name)
     e = commands.BadArgument("The role you included as an argument is invalid")
     try:
@@ -371,8 +375,9 @@ async def edit(ctx, name, role):
         if (role == "everyone"):
             role = ctx.guild.default_role.id
         changeRole(targetChannel, role)
-        message = f'Channel {name} changed to tracking role {role} successfully!'
-        print(f'Channel {name} edited in guild {ctx.guild}')
+        await targetChannel.edit(name=newName)
+        message = f'Channel {name} changed to tracking role {role} with new name {newName} successfully!'
+        print(f'Channel {newName} edited in guild {ctx.guild}')
     except:
         message = f'Failed to edit channel. This is likely because the name or ID you supplied is incorrect'
     await ctx.send(message)
@@ -381,11 +386,25 @@ async def edit(ctx, name, role):
 async def editHelp(ctx, error):
     prefix = getPrefix(ctx.guild.id)
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f'To edit a counting channel you must supply (a name or an id) and a role as arguments, so if you want to edit the channel named Everyone: and make it track users that have both the @everyone role then enter\n\n\n{prefix}edit "Everyone:" "@everyone".\n\nNOTE: The roles you wish to track must be pinged!!!\n\n\nYou supplied {name} as your channel name or id and {role} as your channel role')
+        await ctx.send(f'To edit a counting channel you must supply (the name or the id) of your old channel, a new role for it to track, and a new name for the channel as arguments, so if you want to edit the channel named Everyone: and make it track users that have the @everyone role, but you don\'t want to change its name, then enter\n\n\n{prefix}edit "Everyone:" "everyone" "Everyone:".\n\nNOTE: The roles you wish to track must be pinged!!!\n\n\n Note2: If you wish to track the @everyone role or track people without any roles then use "everyone" or "norole" instead of pinging a role.')
         print(error)
     elif isinstance(error, commands.BadArgument):
         await ctx.send(f'The role you included as an argument is invalid')
         print(error)
     else:
         raise error
+@bot.command(name="debugServers", help="Command for debugging")
+@commands.is_owner()
+async def getIdsOfServers(ctx):
+    for guild in bot.guilds:
+        print(f"Id of guild {guild.name} is {guild.id}")
+    await ctx.send('Printed guild ids in console')
+@getIdsOfServers.error
+async def debugError(ctx, error):
+    prefix = getPrefix(ctx.guild.id)
+    if isinstance(error, commands.NotOwner):
+        await ctx.send(f'You must be the bot owner to use this command')
+        print(error)
+
+
 bot.run(TOKEN)
