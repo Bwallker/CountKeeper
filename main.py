@@ -52,7 +52,7 @@ def addPrefix(guildId: int):
     global DEFAULT_PREFIX
     prefixes = sqlite3.connect("prefixes.sqlite")
     cursor = prefixes.cursor()
-    cursor.execute(f"""INSERT INTO prefixes (guild_id, prefix) VALUES({guildId},{DEFAULT_PREFIX})""")
+    cursor.execute(f"""INSERT INTO prefixes (guild_id, prefix) VALUES(?,?)""", (guildId, DEFAULT_PREFIX))
     prefixes.commit()
     cursor.close()
     prefixes.close()
