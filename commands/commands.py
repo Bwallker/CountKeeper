@@ -143,5 +143,23 @@ async def listChannels(ctx):
     await ctx.send(message)
     print(message)
 
-    
-    
+async def listGuilds(ctx, bot):
+    print("Printing guild names...")
+    for guild in bot.guilds:
+        print("Guild name: " + guild.name)
+        print("Guild ID: " + str(guild.id))
+        print()
+    print("Done printing guilds")
+
+async def listChannelsInAllGuilds(ctx, bot):
+    print("Printing channels in guild...")
+    for guild in bot.guilds:
+        print("Printing channels in guild " + guild.name)
+        i = 0
+        for channel in guild.voice_channels:
+            i+=1
+            print("Channel number " + str(i) + ": \n")
+            print("\tChannel name: " + channel.name)
+            print("\tChannel id: " + str(channel.id))
+            print("Done printing channel number " + str(i))
+        print("Done printing channels in guild " + guild.name)
