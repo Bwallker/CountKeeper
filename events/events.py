@@ -1,5 +1,6 @@
 from utils import CountingChannels
 from utils import sqlite3
+from utils import utils
 #This file contains all the code for how the bot should handle different events
 async def on_ready(bot):
     print(f"{bot.user} has connected to Discord!")
@@ -8,9 +9,9 @@ async def on_ready(bot):
     print("Standing by")
 
 async def on_guild_join(guild):
-    result = sqlite3.getPrefix(guild.id)
-    if result is None:
-        sqlite3.addPrefix(guild.id)
+    utils.addPrefixToGuildIfNone(guild)
+    
+    utils.removeDeletedChannelsFromDB
     print(f"Bot joined guild {guild.name} (ID:) {guild.id}")
 async def on_guild_leave(guild):
     print(f"Bot left guild {guild.name} (ID:) {guild.id}")
