@@ -61,7 +61,7 @@ def getRole (channel: channelClass):
     channels.close()
     return role
 
-def addRole  (channel: channelClass, role: str):
+def addRole (channel: channelClass, role: str):
     guildId = channel.guild.id
     guildId = str(guildId)
     channels = sqlite3.connect("utils/channels.sqlite")
