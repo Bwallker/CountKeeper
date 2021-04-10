@@ -1,1 +1,1 @@
-cd venv/scripts && activate && cd ../ && cd ../ && python main.py
+venv\Scripts\activate.bat && python CountKeeper.py
