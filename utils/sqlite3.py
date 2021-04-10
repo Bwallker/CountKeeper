@@ -86,7 +86,7 @@ def changeRole(channel: channelClass, role: str):
     channels.close()
 
 def deleteChannel(channelId: int):
-    channelId = str(channelIds)
+    channelId = str(channelId)
     channels = sqlite3.connect("utils/channels.sqlite")
     cursor = channels.cursor()
     cursor.execute(f"""DELETE FROM channels WHERE channel_id = {channelId}""")
