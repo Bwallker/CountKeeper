@@ -95,4 +95,14 @@ async def editHelp(ctx, error):
 @bot.command(name="listChannels", help="Lists all the Counting Channels in your guild")
 async def listChannels(ctx):
     await commands.listChannels(ctx)
+
+@bot.command(name="listGuilds", help="Debugging command - Lists all the guilds the bot is in")
+async def listGuilds(ctx):
+    global bot
+    await commands.listGuilds(ctx, bot)
+@bot.command(name="listChannelsInAllGuilds", help="Debugging command - Lists all the channels in the guilds the bot is apart of")
+async def listChannelsInAllGuilds(ctx):
+    global bot
+    await commands.listChannelsInAllGuilds(ctx, bot)
+
 bot.run(BOT_TOKEN)
