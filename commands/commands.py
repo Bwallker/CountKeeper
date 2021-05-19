@@ -3,6 +3,9 @@ from discord.ext import commands, tasks
 import discord
 from discord import message as msg
 from utils import CountingChannels
+from utils import utils
+from utils import DiscordUtils
+
 async def forceUpdate(ctx):
     await CountingChannels.calculateChannels(None, "forced update", ctx, ctx.guild)
 
@@ -31,24 +34,15 @@ async def prefixError(ctx, error):
         raise error
 # -----------------------------------------------------------------------------------------
 async def create(ctx, name, role):
+    role = CountingChannels.cleanUpType(ctx, role)
     prefix = sqlite3.getPrefix(ctx.guild.id)
-    name = str(name)
     e = commands.BadArgument("The role you included as an argument is invalid")
-    try:
-        if (role != "everyone" and role != "norole"):
-            role = str(role)
-            role = role.lower()
-            role = role[3:-1]
-    except:
-        raise e
     if (CountingChannels.roleValidityChecker(ctx, role) is False):
         raise e
     try:
         channel = await ctx.guild.create_voice_channel(name)
     except:
         raise commands.BotMissingPermissions('The bot must have the Manage Channels permission in order for it to be able to create channels')
-    if (role == "everyone"):
-        role = ctx.guild.default_role.id
     sqlite3.addRole(channel, role)
 
     answer = f'Channel {name} tracking roleId {role} created successfully!\n\nUse command {prefix}edit "name of channel" "role you wish to track instead" to change the role that your channel tracks.\n\n NOTE: The edit command will change the first channel it finds with name you supplied. If you have more than one channel with the same name then use the channel ID instead of its name.\n\nNOTE2: You can freely change the name of your channel without issue. Just take care to include a number in your new name that the bot can change when it updates the role totals'
@@ -74,32 +68,23 @@ async def createError(ctx, error):
         raise error
 # -----------------------------------------------------------------------------------------
 async def edit(ctx, name, role, newName):
-    name = str(name)
+    role = CountingChannels.cleanUpType(ctx, role)
     e = commands.BadArgument("The role you included as an argument is invalid")
-    try:
-        if (role != "everyone" and role != "norole"):
-            role = str(role)
-            role = role.lower()
-            role = role[3:-1]
-    except:
-        raise e
     if (CountingChannels.roleValidityChecker(ctx, role) is False):
         raise e
-    try:
+    if isinstance(name, int) is True:
         name = int(name)
         targetChannel = None
         for channel in ctx.guild.voice_channels:
             if channel.id == name:
                 targetChannel = channel
-    except:
+    else:
         name = str(name)
         targetChannel = None
         for channel in ctx.guild.voice_channels:
             if channel.name == name:
                 targetChannel = channel
     try:
-        if (role == "everyone"):
-            role = ctx.guild.default_role.id
         sqlite3.changeRole(targetChannel, role)
         await targetChannel.edit(name=newName)
         message = f'Channel {name} changed to tracking role {role} with new name {newName} successfully!'
@@ -121,6 +106,7 @@ async def editError(ctx, error):
     else:
         raise error
 # -----------------------------------------------------------------------------------------
+
 async def listChannels(ctx):
     channelIdRoles = sqlite3.getChannelRoles(ctx.guild.id)
     if channelIdRoles is None:
@@ -142,6 +128,7 @@ async def listChannels(ctx):
         message += "Channel number " + str(i) + ":\n\t" + "Channel name: (" + channel.name + ") and ID: (" + str(channel.id) + ") tracking role: (" + role + ")\n"
     await ctx.send(message)
     print(message)
+# -----------------------------------------------------------------------------------------
 
 async def listGuilds(ctx, bot):
     print("Printing guild names...")
@@ -150,6 +137,15 @@ async def listGuilds(ctx, bot):
         print("Guild ID: " + str(guild.id))
         print()
     print("Done printing guilds")
+
+async def listGuildsError(ctx, error):
+    if isinstance(error, commands.NotOwner):
+        await ctx.send("You must be the bot owner to use this command")
+    elif isinstance(error, commands.TooManyArguments):
+        await ctx.send("You gave this command arguments, even though it doesn't take any")
+    else:
+        raise error
+# -----------------------------------------------------------------------------------------
 
 async def listChannelsInAllGuilds(ctx, bot):
     print("Printing channels in guild...")
@@ -163,3 +159,43 @@ async def listChannelsInAllGuilds(ctx, bot):
             print("\tChannel id: " + str(channel.id))
             print("Done printing channel number " + str(i))
         print("Done printing channels in guild " + guild.name)
+
+
+async def listChannelsinAllGuildsError(ctx, error):
+    if isinstance(error, commands.NotOwner):
+        await ctx.send("You must be the bot owner to use this command")
+    elif isinstance(error, commands.TooManyArguments):
+        await ctx.send("You gave this command arguments, even though it doesn't take any")
+    else:
+        raise error
+# -----------------------------------------------------------------------------------------
+
+async def listRoles(ctx):
+    await utils.printAndSend(ctx, f"Listing roles in guild {ctx.guild.name}...")
+    i = 0
+    message = ""
+    for role in ctx.guild.roles:
+        i += 1
+        message += f"Role number {i} in guild {ctx.guild.name}:\n"
+        message += f"\tRole name: {role.name}\n"
+        message += f"\tRole ID: {role.id}\n"
+    await utils.printAndSend(ctx, message)
+        
+async def listRolesError(ctx, error):
+    if isinstance(error, commands.TooManyArguments):
+        await ctx.send("You gave this command arguments, even though it doesn't take any")
+        
+# -----------------------------------------------------------------------------------------
+
+async def testUtils(ctx):
+    test = DiscordUtils.find(lambda m: str(m.id) == '184170364757213186', ctx.guild.members)
+    test = str(test.name)
+    await utils.printAndSend(ctx, test)
+
+async def testUtilsError(ctx, error):            
+    if isinstance(error, commands.NotOwner):
+        await ctx.send("You must be the bot owner to use this command")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("You must include the name of the utility function you wish to call as well as all the argument that function takes")
+    else:
+        raise error

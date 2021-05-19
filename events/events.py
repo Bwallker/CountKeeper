@@ -23,6 +23,7 @@ async def on_message(bot, message):
         if mention == bot.user:
             prefix = sqlite3.getPrefix(message.guild.id)
             await message.channel.send("My prefix for this server is: " + prefix)
+    
 
 async def on_member_update(before, after):
     if before.roles != after.roles:
