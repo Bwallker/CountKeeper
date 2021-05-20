@@ -21,7 +21,8 @@ TODO:
 
 
 CONTRIBUTING:
-- Push your changes to the beta branch, so I can test them on the beta version of the bot. Please don't override the databases or config.json in the process :). They have caused me much grief...
+- Create a new branch that is named after the feature you are adding and your own name
+- So if you were to add a new command you might name your branch "Name of command"/"Your username"
 -----------------------------------------------------------------------
 
 Self hosting instructions:
