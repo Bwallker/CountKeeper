@@ -1,15 +1,15 @@
-from utils import sqlite3
+from utils import db
 
 def addPrefixToGuildIfNone(guild):
     #Called on_guild_join
     #Sets the prefix of a guild to the default prefix if it doesn't have one
-    result = sqlite3.getPrefix(guild.id)
+    result = db.getPrefix(guild.id)
     if result is None:
-        sqlite3.addPrefix(guild.id)
+        db.addPrefix(guild.id)
 
 def removeDeletedChannelsFromDB(guild):
     #Removes deleted channels from the DB that the bot might have previously been tracking when it was in the guild previously
-    countingChannelIds = sqlite3.getChannels(guild.id)
+    countingChannelIds = db.getChannels(guild.id)
     for countingChannelId in countingChannelIds:
         exists = False
         for voiceChannel in guild.voice_channels:
@@ -17,7 +17,7 @@ def removeDeletedChannelsFromDB(guild):
                 exists = True
         if exists is False:
             #Remove it from the DB
-            sqlite3.deleteChannel(countingChannelId)
+            db.deleteChannel(countingChannelId)
 
 async def printAndSend(ctx, message):
     #Prints and sends a message --- This func is here to make it so I don't have to do both one after the other constantly

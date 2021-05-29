@@ -1,4 +1,5 @@
 def find(func, iterable, *args, **kwargs):
+
     for element in iterable:
         if func(element, *args, **kwargs):
             return element
@@ -12,3 +13,4 @@ def filter(func, iterable, *args, **kwargs):
     if not returnTouple:
         return None
     return returnTouple
+

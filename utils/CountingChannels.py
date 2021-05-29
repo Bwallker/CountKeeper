@@ -1,5 +1,5 @@
 import discord
-from utils import sqlite3
+from utils import db
 from utils import utils
 # This file contains helper functions for updating the channels
 
@@ -42,7 +42,7 @@ async def calculateChannels(member, mode, ctx, guild):
             # Every member has at least one role: @everyone
             sumOfRoles["norole"] += 1
 
-    channelRoles = sqlite3.getChannelRoles(guild.id)
+    channelRoles = db.getChannelRoles(guild.id)
     if channelRoles is not None:
         for channelId in channelRoles:
             role = channelRoles.get(channelId)

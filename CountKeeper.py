@@ -2,24 +2,23 @@
 #- Implement more advanced Counting Channels (Track several roles in one channel)
 #- Split main.py into several files. probably utils.py, bot.py, commands.py, and maybe one file for every command
 #- 
-from utils import sqlite3
+from utils import db
 from events import events
 from commands import commands as commands
 import discord
 from discord.ext import commands as discordCommands
-#Automatically takes every item in the config file and creates a global variable based on it.
-#Makes it so I don't have to pull the info out of the config file manually every time I add a new thing to it
-#Makes the IDE debugger unhappy because the variables aren't explicitly created
 from utils import config
-for (key, value) in config.configData.items():
-        globals()[key] = value
+
+
+DEFAULT_PREFIX = config.configData["DEFAULT_PREFIX"]
+BOT_TOKEN = config.configData["BOT_TOKEN"]
 intents = discord.Intents.default()
 # Intents.members is needed for the bot to be able to see what roles every member has
 intents.members = True
 # Intents.presences is needed for the bot to be able to see what members are online
 intents.presences = True
 def get_prefix(bot, message):
-    return sqlite3.getPrefix(message.guild.id)
+    return db.getPrefix(message.guild.id)
 
 bot = discordCommands.Bot(command_prefix=get_prefix, intents=intents)
 
@@ -115,8 +114,5 @@ async def listChannelsInAllGuildsError(ctx, error):
 async def listRoles(ctx):
     await commands.listRoles(ctx)
 
-@bot.command(name="testUtils", help="Debugging command - Can be used to some of the utility functions I've written")
-@discordCommands.is_owner()
-async def testUtils(ctx):
-    await commands.testUtils(ctx)
+
 bot.run(BOT_TOKEN)
