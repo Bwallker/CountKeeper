@@ -2,3 +2,6 @@ _pycache_
 commands/_pycache_
 utils/_pycache_
 events/_pycache_
+/CountKeeperData
+/CountKeeperVenv
+.gitmodules
