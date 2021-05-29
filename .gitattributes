@@ -1,4 +1,0 @@
-'config.json merge=ours'
-'utils/channels.sqlite merge=ours'
-'utils/prefixes.sqlite merge=ours'
-'.gitignore merge=ours'
