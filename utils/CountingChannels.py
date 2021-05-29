@@ -1,9 +1,22 @@
 import discord
-from utils import sqlite3
-#This file contains helper functions for updating the channels
+from utils import db
+from utils import utils
+# This file contains helper functions for updating the channels
+
+validOperands = (
+    "and",
+    "nand",
+    "or",
+    "nor",
+    "xor",
+    "nxor"
+)
+
+
 async def calculateChannels(member, mode, ctx, guild):
     if mode == "startup":
-        print(f"Performing startup updates for channels in guild: {guild.name}")
+        print(
+            f"Performing startup updates for channels in guild: {guild.name}")
     if mode == "member left":
         print(f"{member} left guild: {guild.name}!")
 
@@ -26,11 +39,11 @@ async def calculateChannels(member, mode, ctx, guild):
             numberOfRoles += 1
             sumOfRoles[str(role.id)] += 1
         if numberOfRoles == 1:
-            #Every member has at least one role: @everyone
+            # Every member has at least one role: @everyone
             sumOfRoles["norole"] += 1
 
-    channelRoles = sqlite3.getChannelRoles(guild.id)
-    if channelRoles is not None: 
+    channelRoles = db.getChannelRoles(guild.id)
+    if channelRoles is not None:
         for channelId in channelRoles:
             role = channelRoles.get(channelId)
             roleNumber = sumOfRoles.get(role)
@@ -38,12 +51,13 @@ async def calculateChannels(member, mode, ctx, guild):
             for channel in guild.voice_channels:
                 if channel.id == channelId:
                     targetChannel = channel
-        
+
             await updateChannel(targetChannel, roleNumber, guild)
 
     print(f"Channels updated in guild {guild}!")
     if (mode == "forced update"):
         await ctx.send("Channels updated!")
+
 
 async def updateChannel(channel, roleNumber, guild):
     firstNumber = None
@@ -64,7 +78,42 @@ async def updateChannel(channel, roleNumber, guild):
     await channel.edit(name=output)
     print(f"channel {previousName} renamed to {channel.name} in guild {guild}")
 
+
+def cleanUpType(ctx, type):
+    global validOperands
+    type = str(type)
+    type = type.lower()
+    words = type.split()
+    for i, word in enumerate(words):
+        word, openingParenthesis, closingParenthesis = utils.removeParenthesis(word)
+        isEveryone = False
+        if word == "@Everyone":
+            word = ctx.guild.default_role.id
+            isEveryone = True
+        word = word.lower()
+        isRole = False
+        try:
+            if isEveryone is True:
+                raise Exception()
+                #So we don't waste time checking if it's a role
+                #I also just relized this try except blocks eats keyboard interupts, but it shouldn't run for long enough for that to really be a problem.
+            maybeRole = word[3:-1]
+            for role in ctx.guild.roles:
+                roleId = str(role.id)
+                if roleId == maybeRole:
+                    isRole = True
+                    break
+            if isRole is True:
+                word = maybeRole
+        except:
+            pass
+        word = utils.addParenthesis(word, openingParenthesis, closingParenthesis)
+        words[i] = word
+    type = " ".join(words)
+    return type
+
 def roleValidityChecker(ctx, input):
+    #DEPRECATED. Used to be in use when types only consisted of a role for the bot to track
     if isinstance(input, str) is False:
         return False
     words = input.split()
@@ -80,6 +129,18 @@ def roleValidityChecker(ctx, input):
         return True
     if (input == "norole"):
         return True
-    if (input == "everyone"):
+    if (input == "@Everyone"):
         return True
     return False
+
+def typeValidityChecker(ctx, type):
+    if isinstance(type, str) is False:
+        return False
+    if utils.checkParenthesis(type) is False:
+        return False
+    
+    words = type.split()
+    for i, word in enumerate(words):
+        word, openingParenthesis, closingParenthesis = utils.removeParenthesis(word)
+        
+        

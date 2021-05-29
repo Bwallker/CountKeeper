@@ -1,5 +1,5 @@
 from utils import CountingChannels
-from utils import sqlite3
+from utils import db
 from utils import utils
 #This file contains all the code for how the bot should handle different events
 async def on_ready(bot):
@@ -21,8 +21,9 @@ async def on_message(bot, message):
         return
     for mention in message.mentions:
         if mention == bot.user:
-            prefix = sqlite3.getPrefix(message.guild.id)
+            prefix = db.getPrefix(message.guild.id)
             await message.channel.send("My prefix for this server is: " + prefix)
+    
 
 async def on_member_update(before, after):
     if before.roles != after.roles:
@@ -35,12 +36,12 @@ async def on_member_remove(member):
     await CountingChannels.calculateChannels(member, "member left", None, member.guild)
 
 async def on_guild_channel_delete(channel):
-    role = sqlite3.getRole(channel)
+    role = db.getRole(channel)
     if (role != None):
         check = True
     else:
         check = False
-    sqlite3.deleteChannel(channel.id)
+    db.deleteChannel(channel.id)
     if (check):
         print(f"Counting Channel {channel} deleted in guild {channel.guild}")
 
