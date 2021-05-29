@@ -30,7 +30,7 @@ Self hosting instructions:
 Requirements:
 1. Stable internet
 2. 24/7 online pc (or at least while you are using the bot)
-3. Python installed
+3. Latest version of Python installed (3.9 currently)
 
 
 Instructions:
