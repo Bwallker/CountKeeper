@@ -85,7 +85,14 @@ async def edit(ctx, name, role, newName):
 @edit.error
 async def editError(ctx, error):
     await commands.editError(ctx, error)
+    
+@bot.command(name="notify", brief="Signs your guild up for announcements about the bot's development and upcomming features", help=commands.notifyHelpText())
+async def notify(ctx, channel):
+    await commands.notify(ctx, channel)
 
+@notify.error
+async def notifyError(ctx, error):
+    await commands.notifyError(ctx, error)
 @bot.command(name="listChannels", help="Lists all the Counting Channels in your guild")
 async def listChannels(ctx):
     await commands.listChannels(ctx)
@@ -114,5 +121,8 @@ async def listChannelsInAllGuildsError(ctx, error):
 async def listRoles(ctx):
     await commands.listRoles(ctx)
 
+@listRoles.error
+async def listRolesError(ctx, error):
+    await commands.listRolesError(ctx, error)
 
 bot.run(BOT_TOKEN)

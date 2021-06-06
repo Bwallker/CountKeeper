@@ -92,6 +92,7 @@ async def edit(ctx, name, role, newName):
     except:
         message = f'Failed to edit channel. This is likely because the name or ID you supplied is incorrect'
     await ctx.send(message)
+
 def editHelpText():
     return "This command edits a Counting Channel.\n\nCounting Channels are the channels that the bot uses to count roles.\n\nTo edit a Counting Channel you must supply (the name or the id) of your old channel, a new role for it to track, and a new name for the channel as arguments, so if you want to edit the channel named \"Everyone: 1\" and make it track users that have the @everyone role, but you don\'t want to change its name, then enter\n\n\n{prefix}edit \"Everyone: 1\" \"everyone\" \"Everyone: 1\".\n\nNOTE: The roles you wish to track must be pinged!!!\n\n\n Note2: If you wish to track the @everyone role or track people without any roles then use \"everyone\" or \"norole\" instead of pinging a role."
 
@@ -106,6 +107,7 @@ async def editError(ctx, error):
     else:
         raise error
 # -----------------------------------------------------------------------------------------
+async def notify(ctx, channelId)
 
 async def listChannels(ctx):
     channelIdRoles = db.getChannelRoles(ctx.guild.id)

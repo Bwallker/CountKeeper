@@ -4,6 +4,7 @@ from utils import config
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
 pathToPrefixes = "CountKeeperData/prefixes.sqlite"
 pathToChannels = "CountKeeperData/channels.sqlite"
+pathToNotified = "CountKeeperData/notify.sqlite"
 
 def getPrefix (guildId: int):
     global pathToPrefixes
@@ -14,7 +15,7 @@ def getPrefix (guildId: int):
         cursor.execute(f"SELECT prefix FROM prefixes WHERE guild_id = {guildId}")
         #cursor.fetchone() returns a touple containing one item
         prefix = cursor.fetchone()[0]
-    except Exception as e:
+    except sqlite3.Error as e:
         prefix = None
     cursor.close()
     prefixes.close()
@@ -53,7 +54,7 @@ def getRole (channel: channelClass):
     try:
         cursor.execute(f"""SELECT role FROM channels WHERE channel_id = {channel.id}""")
         role = cursor.fetchone()[0]
-    except:
+    except sqlite3.Error as e:
         role = None
     cursor.close()
     channels.close()
@@ -99,7 +100,7 @@ def getChannelRoles (guildId: int):
     try:
         cursor.execute(f"""SELECT channel_id FROM channels WHERE guild_id = {guildId}""")
         channelIds = cursor.fetchall()
-    except:
+    except sqlite3.Error as e:
         cursor.close()
         channels.close()
         return None
@@ -130,3 +131,17 @@ def getChannels (guildId: int):
     cursor.close()
     channels.close()
     return channelIds
+
+def addNotificationChannel(channel: channelClass):
+    global pathToNotified
+    try:
+        notified = sqlite3.connect(pathToNotified)
+        cursor = notified.cursor()
+        cursor.execute("""INSERT INTO notified (guild_id, channel_id VALUES(?,?)""", (channel.guild.id, channel.id))
+        notified.commit()
+        successful = True
+    except sqlite3.Error as e:
+        successful = False
+    cursor.close()
+    notified.close()
+    return successful

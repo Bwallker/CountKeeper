@@ -1,6 +1,9 @@
 from utils import CountingChannels
 from utils import db
 from utils import utils
+from discord import guild as guildClass
+from events import EventHelpers
+import discord
 #This file contains all the code for how the bot should handle different events
 async def on_ready(bot):
     print(f"{bot.user} has connected to Discord!")
@@ -8,11 +11,16 @@ async def on_ready(bot):
         await CountingChannels.calculateChannels(None, "startup", None, guild)
     print("Standing by")
 
-async def on_guild_join(guild):
+async def on_guild_join(guild: guildClass):
     utils.addPrefixToGuildIfNone(guild)
-    
     utils.removeDeletedChannelsFromDB
     print(f"Bot joined guild {guild.name} (ID:) {guild.id}")
+    logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.bot_add).flatten()
+    inviter = logs[0].user
+    await inviter.send(embed=EventHelpers.guildJoinMessage(inviter, guild))
+    
+    
+    
 async def on_guild_leave(guild):
     print(f"Bot left guild {guild.name} (ID:) {guild.id}")
 
@@ -22,7 +30,7 @@ async def on_message(bot, message):
     for mention in message.mentions:
         if mention == bot.user:
             prefix = db.getPrefix(message.guild.id)
-            await message.channel.send("My prefix for this server is: " + prefix)
+            await message.channel.send(f"My prefix for this server is: {prefix}")
     
 
 async def on_member_update(before, after):
