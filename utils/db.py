@@ -1,14 +1,12 @@
 import sqlite3
 from discord import channel as channelClass
-#Automatically takes every item in the config file and creates a global variable based on it.
-#Makes it so I don't have to pull the info out of the config file manually every time I add a new thing to it
-#Makes the IDE debugger unhappy because the variables aren't explicitly created.
 from utils import config
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
 pathToPrefixes = "CountKeeperData/prefixes.sqlite"
 pathToChannels = "CountKeeperData/channels.sqlite"
 
 def getPrefix (guildId: int):
+    global pathToPrefixes
     try:
         prefixes = sqlite3.connect(pathToPrefixes)
         cursor = prefixes.cursor()
@@ -23,8 +21,8 @@ def getPrefix (guildId: int):
     return prefix
 
 def addPrefix (guildId: int):
+    global DEFAULT_PREFIX, pathToPrefixes
     guildId = str(guildId)
-    global DEFAULT_PREFIX
     prefixes = sqlite3.connect(pathToPrefixes)
     cursor = prefixes.cursor()
     cursor.execute("""INSERT INTO prefixes (guild_id, prefix) VALUES(?,?)""", (guildId, DEFAULT_PREFIX))
@@ -33,6 +31,7 @@ def addPrefix (guildId: int):
     prefixes.close()
 
 def changePrefix (guildId: int, prefix):
+    global pathToPrefixes
     guildId = str(guildId)
     if (isinstance(prefix, int) is False and isinstance(prefix, str) is False):
         #Should never happen. Pretty sure all the args in a command call get converted to strings by discord anyway.
@@ -48,8 +47,7 @@ def changePrefix (guildId: int, prefix):
     prefixes.close()
 
 def getRole (channel: channelClass):
-    guildId = channel.guild.id
-    guildId = str(guildId)
+    global pathToChannels
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
     try:
@@ -62,8 +60,7 @@ def getRole (channel: channelClass):
     return role
 
 def addRole (channel: channelClass, role: str):
-    guildId = channel.guild.id
-    guildId = str(guildId)
+    global pathToChannels
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
     cursor.execute("""INSERT INTO channels (guild_id, channel_id, role) VALUES(?,?,?)""", (channel.guild.id, channel.id, role))
@@ -72,12 +69,11 @@ def addRole (channel: channelClass, role: str):
     channels.close()
 
 def changeRole (channel: channelClass, role: str):
+    global pathToChannels
     targetRole = getRole(channel)
     if targetRole is None:
         addRole(channel, role)
         return
-    guildId = channel.guild.id
-    guildId = str(guildId)
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
     cursor.execute("""UPDATE channels SET role = ? WHERE channel_id = ?""", (role, channel.id))
@@ -86,6 +82,7 @@ def changeRole (channel: channelClass, role: str):
     channels.close()
 
 def deleteChannel (channelId: int):
+    global pathToChannels
     channelId = str(channelId)
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
@@ -95,6 +92,7 @@ def deleteChannel (channelId: int):
     channels.close()
 
 def getChannelRoles (guildId: int):
+    global pathToChannels
     guildId = str(guildId)
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
@@ -118,6 +116,7 @@ def getChannelRoles (guildId: int):
     return channelRole
 
 def getChannels (guildId: int):
+    global pathToChannels
     guildId = str(guildId)
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
