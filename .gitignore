@@ -1,7 +1,7 @@
-_pycache_
-commands/_pycache_
-utils/_pycache_
-events/_pycache_
+__pycache__
+commands/__pycache__
+utils/__pycache__
+events/__pycache__
 /CountKeeperData
 /CountKeeperVenv
 CountKeeperData

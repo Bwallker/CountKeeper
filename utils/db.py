@@ -4,7 +4,7 @@ from discord import channel as channelClass
 #Makes it so I don't have to pull the info out of the config file manually every time I add a new thing to it
 #Makes the IDE debugger unhappy because the variables aren't explicitly created.
 from utils import config
-DEFAULT_PREFIX = config.configData["DEFAULT_PREFIX"]
+DEFAULT_PREFIX = config.DEFAULT_PREFIX
 pathToPrefixes = "CountKeeperData/prefixes.sqlite"
 pathToChannels = "CountKeeperData/channels.sqlite"
 

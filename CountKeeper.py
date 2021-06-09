@@ -10,8 +10,8 @@ from discord.ext import commands as discordCommands
 from utils import config
 
 
-DEFAULT_PREFIX = config.configData["DEFAULT_PREFIX"]
-BOT_TOKEN = config.configData["BOT_TOKEN"]
+DEFAULT_PREFIX = config.DEFAULT_PREFIX
+BOT_TOKEN = config.BOT_TOKEN
 intents = discord.Intents.default()
 # Intents.members is needed for the bot to be able to see what roles every member has
 intents.members = True
