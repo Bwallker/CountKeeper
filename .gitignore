@@ -4,4 +4,6 @@ utils/_pycache_
 events/_pycache_
 /CountKeeperData
 /CountKeeperVenv
+CountKeeperData
+CountKeeperVenv
 .gitmodules
