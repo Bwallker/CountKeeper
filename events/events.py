@@ -1,5 +1,5 @@
 from utils import CountingChannels
-from utils import db
+from db import db
 from utils import utils
 from discord import guild as guildClass
 from events import EventHelpers

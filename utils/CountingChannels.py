@@ -1,5 +1,5 @@
 import discord
-from utils import db
+from db import db
 from utils import utils
 # This file contains helper functions for updating the channels
 
