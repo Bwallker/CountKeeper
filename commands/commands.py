@@ -48,7 +48,7 @@ async def create(ctx, name, role):
         channel = await ctx.guild.create_voice_channel(name)
     except:
         raise commands.BotMissingPermissions('The bot must have the Manage Channels permission in order for it to be able to create channels')
-    successful = db.addRole(channel, role)
+    successful = db.addType(channel, role)
     if not successful:
         raise DBError
     answer = f'Channel {name} tracking roleId {role} created successfully!\n\nUse command {prefix}edit "name of channel" "role you wish to track instead" to change the role that your channel tracks.\n\n NOTE: The edit command will change the first channel it finds with name you supplied. If you have more than one channel with the same name then use the channel ID instead of its name.\n\nNOTE2: You can freely change the name of your channel without issue. Just take care to include a number in your new name that the bot can change when it updates the role totals'
@@ -93,7 +93,7 @@ async def edit(ctx, name, role, newName):
             if channel.name == name:
                 targetChannel = channel
     try:
-        db.changeRole(targetChannel, role)
+        db.changeType(targetChannel, role)
         await targetChannel.edit(name=newName)
         message = f'Channel {name} changed to tracking role {role} with new name {newName} successfully!'
         print(f'Channel {newName} edited in guild {ctx.guild}')
@@ -130,8 +130,14 @@ async def notify(ctx, channelIdOrName):
     message = f'Notification channel has been been set to channel with ID of ({str(channel.id)}) and name of ({channel.name}) in guild {channel.guild.name}'
     await utils.printAndSend(message)
 
+def notifyHelpText():
+    return "TODO"
+
+async def notifyError(ctx, error):
+    await utils.printAndSend(error)
+# -----------------------------------------------------------------------------------------
 async def listChannels(ctx):
-    channelIdRoles = db.getChannelRoles(ctx.guild.id)
+    channelIdRoles = db.getChannelTypes(ctx.guild.id)
     if channelIdRoles is None:
         message = f"guild {ctx.guild.name} contains no Counting Channels"
         await ctx.send(message)

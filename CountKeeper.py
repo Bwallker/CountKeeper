@@ -7,7 +7,9 @@ from events import events
 from commands import commands as commands
 import discord
 from discord.ext import commands as discordCommands
+import DiscordOverrides
 from utils import config
+from utils import utils
 
 
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
@@ -20,7 +22,7 @@ intents.presences = True
 def get_prefix(bot, message):
     return db.getPrefix(message.guild.id)
 
-bot = discordCommands.Bot(command_prefix=get_prefix, intents=intents)
+bot = DiscordOverrides.Bot(command_prefix=get_prefix, intents=intents)
 
 @bot.event
 async def on_ready():
@@ -34,7 +36,7 @@ async def on_guild_join(guild):
 @bot.event
 async def on_guild_leave(guild):
     await events.on_guild_leave(guild)
-
+    
 @bot.listen('on_message')
 async def on_message(message):
     global bot
@@ -125,4 +127,11 @@ async def listRoles(ctx):
 async def listRolesError(ctx, error):
     await commands.listRolesError(ctx, error)
 
+@bot.command(name="repeat", help="Replies with what you typed")
+async def repeat(ctx):
+    await utils.printAndSend(ctx, "stat/help")
+
+@repeat.error
+async def repeatError(ctx, error):
+    await utils.printAndSend(ctx ,error)
 bot.run(BOT_TOKEN)

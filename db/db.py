@@ -59,25 +59,25 @@ def changePrefix (guildId: int, prefix):
     prefixes.close()
     return successful
 
-def getRole (channel: channelClass):
+def getType (channel: channelClass):
     global pathToChannels
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
     try:
-        cursor.execute(f"""SELECT role FROM channels WHERE channel_id = {channel.id}""")
-        role = cursor.fetchone()[0]
+        cursor.execute(f"""SELECT type FROM channels WHERE channel_id = {channel.id}""")
+        type = cursor.fetchone()[0]
     except sqlite3.Error as e:
-        role = None
+        type = None
     cursor.close()
     channels.close()
-    return role
+    return type
 
-def addRole (channel: channelClass, role: str):
+def addType (channel: channelClass, type: str):
     global pathToChannels
     try:
         channels = sqlite3.connect(pathToChannels)
         cursor = channels.cursor()
-        cursor.execute("""INSERT INTO channels (guild_id, channel_id, role) VALUES(?,?,?)""", (channel.guild.id, channel.id, role))
+        cursor.execute("""INSERT INTO channels (guild_id, channel_id, type) VALUES(?,?,?)""", (channel.guild.id, channel.id, type))
         channels.commit()
         successful = True
     except sqlite3.Error as e:
@@ -86,15 +86,15 @@ def addRole (channel: channelClass, role: str):
     channels.close()
     return successful
 
-def changeRole (channel: channelClass, role: str):
+def changeType (channel: channelClass, type: str):
     global pathToChannels
-    targetRole = getRole(channel)
-    if targetRole is None:
-        return addRole(channel, role)
+    targetType = getType(channel)
+    if targetType is None:
+        return addType(channel, type)
     try:
         channels = sqlite3.connect(pathToChannels)
         cursor = channels.cursor()
-        cursor.execute("""UPDATE channels SET role = ? WHERE channel_id = ?""", (role, channel.id))
+        cursor.execute("""UPDATE channels SET type = ? WHERE channel_id = ?""", (type, channel.id))
         channels.commit()
         successful = True
     except sqlite3.Error as e:
@@ -118,7 +118,7 @@ def deleteChannel (channelId: int):
     channels.close()
     return successful
 
-def getChannelRoles (guildId: int):
+def getChannelTypes (guildId: int):
     global pathToChannels
     guildId = str(guildId)
     channels = sqlite3.connect(pathToChannels)
@@ -130,17 +130,17 @@ def getChannelRoles (guildId: int):
         cursor.close()
         channels.close()
         return None
-    channelRole = {}
+    channelType = {}
     for channelId in channelIds:
-        cursor.execute("""SELECT role FROM channels WHERE channel_id = ?""", (channelId))
+        cursor.execute("""SELECT type FROM channels WHERE channel_id = ?""", (channelId))
         channelId = channelId[0]
-        role = cursor.fetchone()
-        if role is not None:
-            role = role[0]
-        channelRole[channelId] = role
+        type = cursor.fetchone()
+        if type is not None:
+            type = type[0]
+        channelType[channelId] = type
     cursor.close()
     channels.close()
-    return channelRole
+    return channelType
 
 def getChannels (guildId: int):
     global pathToChannels

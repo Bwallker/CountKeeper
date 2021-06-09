@@ -4,10 +4,23 @@ from utils import utils
 from discord import guild as guildClass
 from events import EventHelpers
 import discord
+from utils import DiscordUtils
 #This file contains all the code for how the bot should handle different events
 async def on_ready(bot):
+    
     print(f"{bot.user} has connected to Discord!")
     for guild in bot.guilds:
+        print(f"Performing startup for guild {guild.name}")
+        print(f"Fetching channels from db...")
+        channels = db.getChannels(guild.id)
+        for channelId in channels:
+            print(f"Checking if channel with id {channelId} still exists")
+            channel = DiscordUtils.find(lambda channel, channelId: channel.id == channelId, guild.voice_channels, channelId)
+            if channel is None:
+                print(f"Channel with id {channelId} doesn't exist. Removing from DB")
+                db.deleteChannel(channelId)
+            else:
+                print(f"Channel with id {channelId} still exists")
         await CountingChannels.calculateChannels(None, "startup", None, guild)
     print("Standing by")
 
@@ -44,8 +57,8 @@ async def on_member_remove(member):
     await CountingChannels.calculateChannels(member, "member left", None, member.guild)
 
 async def on_guild_channel_delete(channel):
-    role = db.getRole(channel)
-    if (role != None):
+    type = db.getType(channel)
+    if (type != None):
         check = True
     else:
         check = False
