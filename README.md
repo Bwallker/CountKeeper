@@ -50,7 +50,7 @@ Please note that the start scripts won't work if you name your venv something el
 ----------------------------------------------------------------------
 
 Invite link for the bot:
-https://discord.com/oauth2/authorize?client_id=813180967028129842&scope=bot&permissions=16
+https://discord.com/oauth2/authorize?client_id=813180967028129842&scope=bot&permissions=613520
 
 Support server:
 https://discord.gg/fq3kYsK4Ms

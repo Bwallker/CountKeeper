@@ -2,12 +2,14 @@
 #- Implement more advanced Counting Channels (Track several roles in one channel)
 #- Split main.py into several files. probably utils.py, bot.py, commands.py, and maybe one file for every command
 #- 
-from utils import db
+from db import db
 from events import events
 from commands import commands as commands
 import discord
 from discord.ext import commands as discordCommands
+import DiscordOverrides
 from utils import config
+from utils import utils
 
 
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
@@ -20,7 +22,7 @@ intents.presences = True
 def get_prefix(bot, message):
     return db.getPrefix(message.guild.id)
 
-bot = discordCommands.Bot(command_prefix=get_prefix, intents=intents)
+bot = DiscordOverrides.Bot(command_prefix=get_prefix, intents=intents)
 
 @bot.event
 async def on_ready():
@@ -34,7 +36,7 @@ async def on_guild_join(guild):
 @bot.event
 async def on_guild_leave(guild):
     await events.on_guild_leave(guild)
-
+    
 @bot.listen('on_message')
 async def on_message(message):
     global bot
@@ -56,7 +58,7 @@ async def on_member_remove(member):
 async def on_guild_channel_delete(channel):
     await events.on_guild_channel_delete(channel)
 
-@bot.command(name="forceUpdate", help="Forces an update to the Counting Channels in your guild")
+@bot.command(name="forceupdate", help="Forces an update to the Counting Channels in your guild")
 async def forceUpdate(ctx):
     await commands.forceUpdate(ctx)
 
@@ -85,12 +87,19 @@ async def edit(ctx, name, role, newName):
 @edit.error
 async def editError(ctx, error):
     await commands.editError(ctx, error)
+    
+@bot.command(name="notify", brief="Signs your guild up for announcements about the bot's development and upcomming features", help=commands.notifyHelpText())
+async def notify(ctx, channel):
+    await commands.notify(ctx, channel)
 
-@bot.command(name="listChannels", help="Lists all the Counting Channels in your guild")
+@notify.error
+async def notifyError(ctx, error):
+    await commands.notifyError(ctx, error)
+@bot.command(name="listchannels", help="Lists all the Counting Channels in your guild")
 async def listChannels(ctx):
     await commands.listChannels(ctx)
 
-@bot.command(name="listGuilds", help="Debugging command - Lists all the guilds the bot is in")
+@bot.command(name="listguilds", help="Debugging command - Lists all the guilds the bot is in")
 @discordCommands.is_owner()
 async def listGuilds(ctx):
     global bot
@@ -100,7 +109,7 @@ async def listGuilds(ctx):
 async def listGuildsError(ctx, error):
     await commands.listGuildsError(ctx, error)
 
-@bot.command(name="listChannelsInAllGuilds", help="Debugging command - Lists all the channels in the guilds the bot is apart of")
+@bot.command(name="listchannelsinallguilds", help="Debugging command - Lists all the channels in the guilds the bot is apart of")
 @discordCommands.is_owner()
 async def listChannelsInAllGuilds(ctx):
     global bot
@@ -110,9 +119,19 @@ async def listChannelsInAllGuilds(ctx):
 async def listChannelsInAllGuildsError(ctx, error):
     await commands.listChannelsInAllGuildsError(ctx, error)
 
-@bot.command(name="listRoles", help="Lists all the roles in your guild, exists mostly for debugging")
+@bot.command(name="listroles", help="Lists all the roles in your guild, exists mostly for debugging")
 async def listRoles(ctx):
     await commands.listRoles(ctx)
 
+@listRoles.error
+async def listRolesError(ctx, error):
+    await commands.listRolesError(ctx, error)
 
+@bot.command(name="repeat", help="Replies with what you typed")
+async def repeat(ctx):
+    await utils.printAndSend(ctx, "stat/help")
+
+@repeat.error
+async def repeatError(ctx, error):
+    await utils.printAndSend(ctx ,error)
 bot.run(BOT_TOKEN)

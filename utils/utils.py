@@ -1,4 +1,4 @@
-from utils import db
+from db import db
 
 def addPrefixToGuildIfNone(guild):
     #Called on_guild_join

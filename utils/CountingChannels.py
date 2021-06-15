@@ -1,5 +1,5 @@
 import discord
-from utils import db
+from db import db
 from utils import utils
 # This file contains helper functions for updating the channels
 
@@ -42,7 +42,7 @@ async def calculateChannels(member, mode, ctx, guild):
             # Every member has at least one role: @everyone
             sumOfRoles["norole"] += 1
 
-    channelRoles = db.getChannelRoles(guild.id)
+    channelRoles = db.getChannelTypes(guild.id)
     if channelRoles is not None:
         for channelId in channelRoles:
             role = channelRoles.get(channelId)
@@ -87,7 +87,7 @@ def cleanUpType(ctx, type):
     for i, word in enumerate(words):
         word, openingParenthesis, closingParenthesis = utils.removeParenthesis(word)
         isEveryone = False
-        if word == "@Everyone":
+        if word == "@everyone":
             word = ctx.guild.default_role.id
             isEveryone = True
         word = word.lower()
@@ -129,7 +129,7 @@ def roleValidityChecker(ctx, input):
         return True
     if (input == "norole"):
         return True
-    if (input == "@Everyone"):
+    if (input == "@everyone"):
         return True
     return False
 

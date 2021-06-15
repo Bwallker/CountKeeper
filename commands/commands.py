@@ -1,4 +1,5 @@
-from utils import db
+from db import DBError
+from db import db
 from discord.ext import commands, tasks
 import discord
 from discord import message as msg
@@ -12,7 +13,9 @@ async def forceUpdate(ctx):
 # -----------------------------------------------------------------------------------------
 async def prefix(ctx, prefix):
     prefix = str(prefix)
-    db.changePrefix(ctx.guild.id, prefix)
+    successful = db.changePrefix(ctx.guild.id, prefix)
+    if not successful:
+        raise DBError()
     print(f"prefix updated to {prefix} in guild: {ctx.guild}")
     message = f"Prefix changed to ( {prefix} )"
     await ctx.send(message)
@@ -30,6 +33,8 @@ async def prefixError(ctx, error):
         await ctx.send(
             "To change prefix for the bot you must have the manage server permission"
         )
+    elif isinstance(error, DBError):
+        await ctx.send("A database error occured while changing the prefix for your server! Try setting it to a different one")
     else:
         raise error
 # -----------------------------------------------------------------------------------------
@@ -43,8 +48,9 @@ async def create(ctx, name, role):
         channel = await ctx.guild.create_voice_channel(name)
     except:
         raise commands.BotMissingPermissions('The bot must have the Manage Channels permission in order for it to be able to create channels')
-    db.addRole(channel, role)
-
+    successful = db.addType(channel, role)
+    if not successful:
+        raise DBError
     answer = f'Channel {name} tracking roleId {role} created successfully!\n\nUse command {prefix}edit "name of channel" "role you wish to track instead" to change the role that your channel tracks.\n\n NOTE: The edit command will change the first channel it finds with name you supplied. If you have more than one channel with the same name then use the channel ID instead of its name.\n\nNOTE2: You can freely change the name of your channel without issue. Just take care to include a number in your new name that the bot can change when it updates the role totals'
     await ctx.send(answer)
     print(f'Channel {name} created in guild {ctx.guild}')
@@ -64,6 +70,8 @@ async def createError(ctx, error):
         await ctx.send(f'The bot must have the Manage Channels permission for it to be able to create channels')
     elif isinstance(error, discord.Forbidden):
         await ctx.send(f'The bot must have the Manage Channels permission for it to be able to create channels')
+    elif isinstance(error, DBError):
+        await ctx.send()
     else:
         raise error
 # -----------------------------------------------------------------------------------------
@@ -85,13 +93,14 @@ async def edit(ctx, name, role, newName):
             if channel.name == name:
                 targetChannel = channel
     try:
-        db.changeRole(targetChannel, role)
+        db.changeType(targetChannel, role)
         await targetChannel.edit(name=newName)
         message = f'Channel {name} changed to tracking role {role} with new name {newName} successfully!'
         print(f'Channel {newName} edited in guild {ctx.guild}')
     except:
         message = f'Failed to edit channel. This is likely because the name or ID you supplied is incorrect'
     await ctx.send(message)
+
 def editHelpText():
     return "This command edits a Counting Channel.\n\nCounting Channels are the channels that the bot uses to count roles.\n\nTo edit a Counting Channel you must supply (the name or the id) of your old channel, a new role for it to track, and a new name for the channel as arguments, so if you want to edit the channel named \"Everyone: 1\" and make it track users that have the @everyone role, but you don\'t want to change its name, then enter\n\n\n{prefix}edit \"Everyone: 1\" \"everyone\" \"Everyone: 1\".\n\nNOTE: The roles you wish to track must be pinged!!!\n\n\n Note2: If you wish to track the @everyone role or track people without any roles then use \"everyone\" or \"norole\" instead of pinging a role."
 
@@ -106,9 +115,29 @@ async def editError(ctx, error):
     else:
         raise error
 # -----------------------------------------------------------------------------------------
+async def notify(ctx, channelIdOrName):
+    try:
+        channelId = int(channelIdOrName)
+        channel = DiscordUtils.get(lambda channel, channelId: channel.id == channelId, ctx.guild.text_channels, channelId)
+        if channel is None:
+            raise ValueError()
+    except ValueError as e:
+        channelName = str(channelIdOrName)
+        channel = DiscordUtils.get(lambda channel, channelName: channel.name == channelName, ctx.guild.text_channels, channelName)
+        if channel is None:
+            raise discord.InvalidArgument("The channel name or id you have provided is invalid")
+    db.addNotificationChannel(channel)
+    message = f'Notification channel has been been set to channel with ID of ({str(channel.id)}) and name of ({channel.name}) in guild {channel.guild.name}'
+    await utils.printAndSend(message)
 
+def notifyHelpText():
+    return "TODO"
+
+async def notifyError(ctx, error):
+    await utils.printAndSend(error)
+# -----------------------------------------------------------------------------------------
 async def listChannels(ctx):
-    channelIdRoles = db.getChannelRoles(ctx.guild.id)
+    channelIdRoles = db.getChannelTypes(ctx.guild.id)
     if channelIdRoles is None:
         message = f"guild {ctx.guild.name} contains no Counting Channels"
         await ctx.send(message)
