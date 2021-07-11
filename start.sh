@@ -1,7 +1,7 @@
 #!/bin/bash -x
 PWD=`pwd`
 activate () {
-    . $PWD/CountKeeperVenv/bin/activate
+    source $PWD/CountKeeperVenv/bin/activate
 }
 
 activate
