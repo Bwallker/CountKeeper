@@ -1,4 +1,5 @@
 import discord
+from logs.log import print
 def guildJoinMessage(inviter, guild):
     title = "Thank you for inviting CountKeeper to your discord server!"
     description = "test"

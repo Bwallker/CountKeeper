@@ -1,3 +1,4 @@
+from logs.log import print
 def find(func, iterable, *args, **kwargs):
 
     for element in iterable:

@@ -5,6 +5,7 @@ from discord import guild as guildClass
 from events import EventHelpers
 import discord
 from utils import DiscordUtils
+from logs.log import print
 #This file contains all the code for how the bot should handle different events
 async def on_ready(bot):
     

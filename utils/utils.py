@@ -1,5 +1,5 @@
 from db import db
-
+from logs.log import print
 def addPrefixToGuildIfNone(guild):
     #Called on_guild_join
     #Sets the prefix of a guild to the default prefix if it doesn't have one

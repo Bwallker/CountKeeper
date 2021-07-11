@@ -1,15 +1,20 @@
+from logs import init_logs
+init_logs.init()
 #TODO:
 #- Implement more advanced Counting Channels (Track several roles in one channel)
 #- Split main.py into several files. probably utils.py, bot.py, commands.py, and maybe one file for every command
 #- 
+
 from db import db
 from events import events
 from commands import commands as commands
 import discord
 from discord.ext import commands as discordCommands
-import DiscordOverrides
 from utils import config
 from utils import utils
+
+from logs.log import print
+from DiscordOverrides.Bot import Bot
 
 
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
@@ -22,7 +27,7 @@ intents.presences = True
 def get_prefix(bot, message):
     return db.getPrefix(message.guild.id)
 
-bot = DiscordOverrides.Bot(command_prefix=get_prefix, intents=intents)
+bot = Bot(command_prefix=get_prefix, intents=intents)
 
 @bot.event
 async def on_ready():
@@ -134,4 +139,6 @@ async def repeat(ctx):
 @repeat.error
 async def repeatError(ctx, error):
     await utils.printAndSend(ctx ,error)
+
+
 bot.run(BOT_TOKEN)

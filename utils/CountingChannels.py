@@ -1,6 +1,7 @@
 import discord
 from db import db
 from utils import utils
+from logs.log import print
 # This file contains helper functions for updating the channels
 
 validOperands = (
@@ -75,8 +76,12 @@ async def updateChannel(channel, roleNumber, guild):
     else:
         output = words
     previousName = channel.name
-    await channel.edit(name=output)
-    print(f"channel {previousName} renamed to {channel.name} in guild {guild}")
+    try:
+        await channel.edit(name=output)
+        print(f"channel {previousName} renamed to {channel.name} in guild {guild}")
+    except discord.errors.Forbidden as e:
+        print(f"discord Forbidden exception raised while trying to rename channel {previousName} in guild {guild.name}")
+    
 
 
 def cleanUpType(ctx, type):

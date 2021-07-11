@@ -1,4 +1,5 @@
 import sqlite3
+from logs.log import print
 from discord import channel as channelClass
 from utils import config
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
