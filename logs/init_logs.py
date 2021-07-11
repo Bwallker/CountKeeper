@@ -53,8 +53,12 @@ def delete_oldest_log(limit: int, log_files: list[str]) -> None:
     for file in log_files:
         file = file[:-4]
         format = "%Y-%m-%d %H-%M-%S"
-        datetime_object = datetime.datetime.strptime(file, format)
-        datetimes.append(datetime_object)
+        try:
+            datetime_object = datetime.datetime.strptime(file, format)
+            datetimes.append(datetime_object)
+        except ValueError as e:
+            print(f'{datetime_object} is not a valid datetime. Ignoring')
+        
 
     datetimes.sort()
     dt: datetime.datetime
