@@ -60,25 +60,25 @@ def changePrefix (guildId: int, prefix):
     prefixes.close()
     return successful
 
-def getType (channel: channelClass):
+def getpattern (channel: channelClass):
     global pathToChannels
     channels = sqlite3.connect(pathToChannels)
     cursor = channels.cursor()
     try:
-        cursor.execute(f"""SELECT type FROM channels WHERE channel_id = {channel.id}""")
-        type = cursor.fetchone()[0]
+        cursor.execute(f"""SELECT pattern FROM channels WHERE channel_id = {channel.id}""")
+        pattern = cursor.fetchone()[0]
     except sqlite3.Error as e:
-        type = None
+        pattern = None
     cursor.close()
     channels.close()
-    return type
+    return pattern
 
-def addType (channel: channelClass, type: str):
+def addpattern (channel: channelClass, pattern: str):
     global pathToChannels
     try:
         channels = sqlite3.connect(pathToChannels)
         cursor = channels.cursor()
-        cursor.execute("""INSERT INTO channels (guild_id, channel_id, type) VALUES(?,?,?)""", (channel.guild.id, channel.id, type))
+        cursor.execute("""INSERT INTO channels (guild_id, channel_id, pattern) VALUES(?,?,?)""", (channel.guild.id, channel.id, pattern))
         channels.commit()
         successful = True
     except sqlite3.Error as e:
@@ -87,15 +87,15 @@ def addType (channel: channelClass, type: str):
     channels.close()
     return successful
 
-def changeType (channel: channelClass, type: str):
+def changepattern (channel: channelClass, pattern: str):
     global pathToChannels
-    targetType = getType(channel)
-    if targetType is None:
-        return addType(channel, type)
+    targetpattern = getpattern(channel)
+    if targetpattern is None:
+        return addpattern(channel, pattern)
     try:
         channels = sqlite3.connect(pathToChannels)
         cursor = channels.cursor()
-        cursor.execute("""UPDATE channels SET type = ? WHERE channel_id = ?""", (type, channel.id))
+        cursor.execute("""UPDATE channels SET pattern = ? WHERE channel_id = ?""", (pattern, channel.id))
         channels.commit()
         successful = True
     except sqlite3.Error as e:
@@ -119,7 +119,7 @@ def deleteChannel (channelId: int):
     channels.close()
     return successful
 
-def getChannelTypes (guildId: int):
+def getChannelpatterns (guildId: int):
     global pathToChannels
     guildId = str(guildId)
     channels = sqlite3.connect(pathToChannels)
@@ -131,17 +131,17 @@ def getChannelTypes (guildId: int):
         cursor.close()
         channels.close()
         return None
-    channelType = {}
+    channelpattern = {}
     for channelId in channelIds:
-        cursor.execute("""SELECT type FROM channels WHERE channel_id = ?""", (channelId))
+        cursor.execute("""SELECT pattern FROM channels WHERE channel_id = ?""", (channelId))
         channelId = channelId[0]
-        type = cursor.fetchone()
-        if type is not None:
-            type = type[0]
-        channelType[channelId] = type
+        pattern = cursor.fetchone()
+        if pattern is not None:
+            pattern = pattern[0]
+        channelpattern[channelId] = pattern
     cursor.close()
     channels.close()
-    return channelType
+    return channelpattern
 
 def getChannels (guildId: int):
     global pathToChannels

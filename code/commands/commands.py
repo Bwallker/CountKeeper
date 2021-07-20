@@ -7,7 +7,6 @@ from utils import CountingChannels
 from utils import utils
 from utils import DiscordUtils
 from logs.log import print
-
 async def forceUpdate(ctx):
     await CountingChannels.calculateChannels(None, "forced update", ctx, ctx.guild)
 
