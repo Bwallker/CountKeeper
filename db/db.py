@@ -1,22 +1,23 @@
 import sqlite3
 from logs.log import print
-from discord import channel as channelClass
+from discord import channel as ChannelClass
 from utils import config
 DEFAULT_PREFIX = config.DEFAULT_PREFIX
-pathToPrefixes = "CountKeeperData/prefixes.sqlite"
-pathToChannels = "CountKeeperData/channels.sqlite"
-pathToNotified = "CountKeeperData/notify.sqlite"
+PATH_TO_PREFIXES = "count_keeper_data/prefixes.sqlite"
+PATH_TO_CHANNELS = "count_keeper_data/channels.sqlite"
+PATH_TO_NOTIFIED = "count_keeper_data/notify.sqlite"
 
-def getPrefix (guildId: int):
-    global pathToPrefixes
+def get_prefix (guild_id: int):
+    global PATH_TO_PREFIXES
     try:
-        prefixes = sqlite3.connect(pathToPrefixes)
+        prefixes = sqlite3.connect(PATH_TO_PREFIXES)
         cursor = prefixes.cursor()
-        guildId = str(guildId)
-        cursor.execute(f"SELECT prefix FROM prefixes WHERE guild_id = {guildId}")
+        guild_id = str(guild_id)
+        cursor.execute(f"""SELECT prefix FROM prefixes WHERE guild_id = ?""", (guild_id,))
         #cursor.fetchone() returns a touple containing one item
         prefix = cursor.fetchone()
     except sqlite3.Error as e:
+        print(e)
         prefix = None
     if prefix is not None:
         prefix = prefix[0]
@@ -24,13 +25,13 @@ def getPrefix (guildId: int):
     prefixes.close()
     return prefix
 
-def addPrefix (guildId: int):
+def add_prefix (guild_id: int):
     global DEFAULT_PREFIX, pathToPrefixes
-    guildId = str(guildId)
+    guild_id = str(guild_id)
     try:
-        prefixes = sqlite3.connect(pathToPrefixes)
+        prefixes = sqlite3.connect(PATH_TO_PREFIXES)
         cursor = prefixes.cursor()
-        cursor.execute("""INSERT INTO prefixes (guild_id, prefix) VALUES(?,?)""", (guildId, DEFAULT_PREFIX))
+        cursor.execute("""INSERT INTO prefixes (guild_id, prefix) VALUES(?,?)""", (guild_id, DEFAULT_PREFIX))
         prefixes.commit()
         successful = True
     except sqlite3.Error as e:
@@ -39,9 +40,9 @@ def addPrefix (guildId: int):
     prefixes.close()
     return successful
 
-def changePrefix (guildId: int, prefix):
-    global pathToPrefixes
-    guildId = str(guildId)
+def change_prefix (guild_id: int, prefix):
+    global PATH_TO_PREFIXES
+    guild_id = str(guild_id)
     if (isinstance(prefix, int) is False and isinstance(prefix, str) is False):
         #Should never happen. Pretty sure all the args in a command call get converted to strings by discord anyway.
         raise TypeError("prefix must be of type int or str")
@@ -49,9 +50,9 @@ def changePrefix (guildId: int, prefix):
         #Just to be safe
         prefix = str(prefix)
     try:
-        prefixes = sqlite3.connect(pathToPrefixes)
+        prefixes = sqlite3.connect(PATH_TO_PREFIXES)
         cursor = prefixes.cursor()
-        cursor.execute("""UPDATE prefixes SET prefix = ? WHERE guild_id = ?""", (prefix, guildId))
+        cursor.execute("""UPDATE prefixes SET prefix = ? WHERE guild_id = ?""", (prefix, guild_id))
         prefixes.commit()
         successful = True
     except sqlite3.Error as e:
@@ -60,12 +61,29 @@ def changePrefix (guildId: int, prefix):
     prefixes.close()
     return successful
 
-def getpattern (channel: channelClass):
-    global pathToChannels
-    channels = sqlite3.connect(pathToChannels)
-    cursor = channels.cursor()
+def remove_prefix (guild_id: int):
+    global PATH_TO_PREFIXES
+    guild_id = str(guild_id)
     try:
-        cursor.execute(f"""SELECT pattern FROM channels WHERE channel_id = {channel.id}""")
+        prefixes = sqlite3.connect(PATH_TO_PREFIXES)
+        cursor = prefixes.cursor()
+        cursor.execute("""DELETE FROM prefixes WHERE guild_id = ?""", (guild_id,))
+        prefixes.commit()
+        successful = True
+    except sqlite3.Error as e:
+        successful = False
+    cursor.close()
+    prefixes.close()
+    return successful
+    
+def get_pattern (channel_id: int):
+    global PATH_TO_CHANNELS
+    channels = sqlite3.connect(PATH_TO_CHANNELS)
+    cursor = channels.cursor()
+    channel_id = str(channel_id)
+    print(channel_id)
+    try:
+        cursor.execute(f"""SELECT pattern FROM channels WHERE channel_id = ?""", (channel_id,))
         pattern = cursor.fetchone()[0]
     except sqlite3.Error as e:
         pattern = None
@@ -73,10 +91,10 @@ def getpattern (channel: channelClass):
     channels.close()
     return pattern
 
-def addpattern (channel: channelClass, pattern: str):
-    global pathToChannels
+def add_pattern (channel: ChannelClass, pattern: str):
+    global PATH_TO_CHANNELS
     try:
-        channels = sqlite3.connect(pathToChannels)
+        channels = sqlite3.connect(PATH_TO_CHANNELS)
         cursor = channels.cursor()
         cursor.execute("""INSERT INTO channels (guild_id, channel_id, pattern) VALUES(?,?,?)""", (channel.guild.id, channel.id, pattern))
         channels.commit()
@@ -87,13 +105,13 @@ def addpattern (channel: channelClass, pattern: str):
     channels.close()
     return successful
 
-def changepattern (channel: channelClass, pattern: str):
-    global pathToChannels
-    targetpattern = getpattern(channel)
-    if targetpattern is None:
-        return addpattern(channel, pattern)
+def change_pattern (channel: ChannelClass, pattern: str):
+    global PATH_TO_CHANNELS
+    target_pattern = get_pattern(channel.id)
+    if target_pattern is None:
+        return add_pattern(channel, pattern)
     try:
-        channels = sqlite3.connect(pathToChannels)
+        channels = sqlite3.connect(PATH_TO_CHANNELS)
         cursor = channels.cursor()
         cursor.execute("""UPDATE channels SET pattern = ? WHERE channel_id = ?""", (pattern, channel.id))
         channels.commit()
@@ -104,13 +122,13 @@ def changepattern (channel: channelClass, pattern: str):
     channels.close()
     return successful
 
-def deleteChannel (channelId: int):
-    global pathToChannels
-    channelId = str(channelId)
+def delete_channel (channel_id: int):
+    global PATH_TO_CHANNELS
+    channel_id = str(channel_id)
     try:
-        channels = sqlite3.connect(pathToChannels)
+        channels = sqlite3.connect(PATH_TO_CHANNELS)
         cursor = channels.cursor()
-        cursor.execute(f"""DELETE FROM channels WHERE channel_id = {channelId}""")
+        cursor.execute(f"""DELETE FROM channels WHERE channel_id = ?""", (channel_id,))
         channels.commit()
         successful = True
     except sqlite3.Error as e:
@@ -119,50 +137,51 @@ def deleteChannel (channelId: int):
     channels.close()
     return successful
 
-def getChannelpatterns (guildId: int):
-    global pathToChannels
-    guildId = str(guildId)
-    channels = sqlite3.connect(pathToChannels)
+def get_channel_patterns (guild_id: int):
+    global PATH_TO_CHANNELS
+    guild_id = str(guild_id)
+    channels = sqlite3.connect(PATH_TO_CHANNELS)
     cursor = channels.cursor()
     try:
-        cursor.execute(f"""SELECT channel_id FROM channels WHERE guild_id = {guildId}""")
-        channelIds = cursor.fetchall()
+        cursor.execute(f"""SELECT channel_id FROM channels WHERE guild_id = ?""", (guild_id,))
+        channel_ids = cursor.fetchall()
     except sqlite3.Error as e:
+        print(e)
         cursor.close()
         channels.close()
         return None
-    channelpattern = {}
-    for channelId in channelIds:
-        cursor.execute("""SELECT pattern FROM channels WHERE channel_id = ?""", (channelId))
-        channelId = channelId[0]
+    channel_pattern = {}
+    for channel_id in channel_ids:
+        cursor.execute("""SELECT pattern FROM channels WHERE channel_id = ?""", channel_id)
+        channel_id = channel_id[0]
         pattern = cursor.fetchone()
         if pattern is not None:
             pattern = pattern[0]
-        channelpattern[channelId] = pattern
+        channel_pattern[channel_id] = pattern
     cursor.close()
     channels.close()
-    return channelpattern
+    return channel_pattern
 
-def getChannels (guildId: int):
-    global pathToChannels
-    guildId = str(guildId)
-    channels = sqlite3.connect(pathToChannels)
+def get_channels (guild_id: int):
+    global PATH_TO_CHANNELS
+    guild_id = str(guild_id)
+    channels = sqlite3.connect(PATH_TO_CHANNELS)
     cursor = channels.cursor()
     try:
-        cursor.execute(f"""SELECT channel_id FROM channels WHERE guild_id = {guildId}""")
-        channelIds = cursor.fetchall()
-        for i, channelId in enumerate(channelIds):
-            channelIds[i] = channelId[0]
+        cursor.execute(f"""SELECT channel_id FROM channels WHERE guild_id = ?""", (guild_id,))
+        channel_ids = cursor.fetchall()
+        for i, channel_id in enumerate(channel_ids):
+            channel_ids[i] = channel_id[0]
     except Exception as e:
-        channelIds = None
+        channel_ids = None
     cursor.close()
     channels.close()
-    return channelIds
+    return channel_ids
 
-def addNotificationChannel(channel: channelClass):
-    global pathToNotified
+def add_notification_channel (channel: ChannelClass):
+    global PATH_TO_NOTIFIED
     try:
-        notified = sqlite3.connect(pathToNotified)
+        notified = sqlite3.connect(PATH_TO_NOTIFIED)
         cursor = notified.cursor()
         cursor.execute("""INSERT INTO notified (guild_id, channel_id VALUES(?,?)""", (channel.guild.id, channel.id))
         notified.commit()

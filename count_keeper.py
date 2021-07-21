@@ -1,3 +1,5 @@
+from asyncio.events import AbstractEventLoop
+from cogs.init import Init
 from logs import init_logs
 init_logs.init()
 
@@ -8,40 +10,40 @@ from db import db
 from events import events
 from commands import commands as commands
 import discord
-from discord.ext import commands as discordCommands
+from discord.ext import commands
 from utils import config
 
 from discord import Message
 from logs.log import print
 from typing import Callable
 import os
-
+import pytest
 import importlib.util
 
-
+import asyncio
 
 
 
                    
 
 
-class CountKeeper(discordCommands.Bot):
-    def __init__(self, command_prefix: Callable[[discordCommands.Bot, Message], str] = None, intents: Intents = None):
+class CountKeeper(commands.Bot):
+    def __init__(self, loop: AbstractEventLoop = None, command_prefix: Callable[[commands.Bot, Message], str] = None, intents: Intents = None):
+        if loop is not None:
+            self.loop = loop
         if command_prefix is None:
-            command_prefix = self.get_prefix
+            command_prefix = self.command_prefix
         if intents is None:
             intents: Intents = discord.Intents.all()
         
         super().__init__(command_prefix=command_prefix, intents=intents)
-        self.DEFAULT_PREFIX = config.DEFAULT_PREFIX
-        self.BOT_TOKEN = config.BOT_TOKEN
         
-        
+        self.add_cog(Init(self))
         for cog in self.get_cogs():
             self.add_cog(cog(self))
-    def get_prefix(bot: discordCommands.bot, message: Message) -> str:
-        return db.getPrefix(message.guild.id)
-    
+        
+    def command_prefix(self, bot: commands.bot, message: Message) -> str:
+        return db.get_prefix(message.guild.id)
     def get_cogs(self, path_to_cogs: str = f'{os.getcwd()}/cogs') -> list:
         class_list = []
         for filename in os.listdir(path_to_cogs):
@@ -73,4 +75,6 @@ class CountKeeper(discordCommands.Bot):
     def unload(self, cog_name: str):
         self.remove_cog(cog_name)
 
-CountKeeper()
+if __name__ == '__main__':
+    keeper = CountKeeper()
+    keeper.run(config.BOT_TOKEN)

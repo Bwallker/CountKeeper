@@ -1,10 +1,11 @@
 import discord
+from discord.channel import VoiceChannel
 from db import db
 from utils import utils
 from logs.log import print
 # This file contains helper functions for updating the channels
 
-validOperands = (
+valid_operands = (
     "and",
     "nand",
     "or",
@@ -14,7 +15,7 @@ validOperands = (
 )
 
 
-async def calculateChannels(member, mode, ctx, guild):
+async def calculate_channels(member, mode, ctx, guild):
     if mode == "startup":
         print(
             f"Performing startup updates for channels in guild: {guild.name}")
@@ -30,122 +31,110 @@ async def calculateChannels(member, mode, ctx, guild):
     elif mode == "role changed":
         print(f"{member} updated a role in guild: {guild.name}")
     print("updating channels...")
-    sumOfRoles = {}
-    sumOfRoles["norole"] = 0
+    sum_of_patterns = {}
+    sum_of_patterns["norole"] = 0
     for role in guild.roles:
-        sumOfRoles[str(role.id)] = 0
+        sum_of_patterns[str(role.id)] = 0
     for member in guild.members:
-        numberOfRoles = 0
+        number_of_patterns = 0
         for role in member.roles:
-            numberOfRoles += 1
-            sumOfRoles[str(role.id)] += 1
-        if numberOfRoles == 1:
+            number_of_patterns += 1
+            sum_of_patterns[str(role.id)] += 1
+        if number_of_patterns == 1:
             # Every member has at least one role: @everyone
-            sumOfRoles["norole"] += 1
+            sum_of_patterns["norole"] += 1
 
-    channelRoles = db.getChannelTypes(guild.id)
-    if channelRoles is not None:
-        for channelId in channelRoles:
-            role = channelRoles.get(channelId)
-            roleNumber = sumOfRoles.get(role)
-            targetChannel = None
+    channel_patterns = db.get_channel_patterns(guild.id)
+    if channel_patterns is not None:
+        for channelId in channel_patterns:
+            role = channel_patterns.get(channelId)
+            role_number = sum_of_patterns.get(role)
+            channel: VoiceChannel
             for channel in guild.voice_channels:
                 if channel.id == channelId:
-                    targetChannel = channel
+                    break
 
-            await updateChannel(targetChannel, roleNumber, guild)
+            await update_channel(channel, role_number, guild)
 
     print(f"Channels updated in guild {guild}!")
     if (mode == "forced update"):
         await ctx.send("Channels updated!")
 
 
-async def updateChannel(channel, roleNumber, guild):
-    firstNumber = None
+async def update_channel(channel, role_number, guild):
+    first_number = None
     words = channel.name.split()
     for i, word in enumerate(words):
         if word.isdigit():
-            firstNumber = word
-            words[i] = str(roleNumber)
+            first_number = word
+            words[i] = str(role_number)
             break
     words = " ".join(words)
     print(words)
     output = None
-    if firstNumber is None:
-        output = channel.name + str(roleNumber)
+    if first_number is None:
+        output = channel.name + str(role_number)
     else:
         output = words
-    previousName = channel.name
+    previous_name = channel.name
     try:
         await channel.edit(name=output)
-        print(f"channel {previousName} renamed to {channel.name} in guild {guild}")
+        print(f"channel {previous_name} renamed to {channel.name} in guild {guild}")
     except discord.errors.Forbidden as e:
-        print(f"discord Forbidden exception raised while trying to rename channel {previousName} in guild {guild.name}")
+        print(f"discord Forbidden exception raised while trying to rename channel {previous_name} in guild {guild.name}")
     
 
 
-def cleanUpType(ctx, type):
-    global validOperands
-    type = str(type)
-    type = type.lower()
-    words = type.split()
+def clean_up_pattern(ctx, pattern):
+    global valid_operands
+    pattern = str(pattern)
+    pattern = pattern.lower()
+    words = pattern.split()
     for i, word in enumerate(words):
-        word, openingParenthesis, closingParenthesis = utils.removeParenthesis(word)
-        isEveryone = False
+        word, opening_parenthesis, closing_parenthesis = utils.remove_parenthesis(word)
+        is_everyone = False
         if word == "@everyone":
             word = ctx.guild.default_role.id
-            isEveryone = True
+            is_everyone = True
         word = word.lower()
-        isRole = False
+        is_role = False
         try:
-            if isEveryone is True:
+            if is_everyone is True:
                 raise Exception()
                 #So we don't waste time checking if it's a role
                 #I also just relized this try except blocks eats keyboard interupts, but it shouldn't run for long enough for that to really be a problem.
-            maybeRole = word[3:-1]
+            maybe_role = word[3:-1]
             for role in ctx.guild.roles:
-                roleId = str(role.id)
-                if roleId == maybeRole:
-                    isRole = True
+                role_id = str(role.id)
+                if role_id == maybe_role:
+                    is_role = True
                     break
-            if isRole is True:
-                word = maybeRole
+            if is_role is True:
+                word = maybe_role
         except:
             pass
-        word = utils.addParenthesis(word, openingParenthesis, closingParenthesis)
+        word = utils.add_parenthesis(word, opening_parenthesis, closing_parenthesis)
         words[i] = word
-    type = " ".join(words)
-    return type
+    pattern = " ".join(words)
+    return pattern
 
-def roleValidityChecker(ctx, input):
+def role_validity_checker(ctx, input):
     #DEPRECATED. Used to be in use when types only consisted of a role for the bot to track
     if isinstance(input, str) is False:
         return False
     words = input.split()
     if len(words) != 1:
         return False
-    isRole = False
+    is_role = False
     for role in ctx.guild.roles:
-        roleId = str(role.id)
-        if roleId == input:
-            isRole = True
+        role_id = str(role.id)
+        if role_id == input:
+            is_role = True
             break
-    if isRole:
+    if is_role:
         return True
     if (input == "norole"):
         return True
     if (input == "@everyone"):
         return True
     return False
-
-def typeValidityChecker(ctx, type):
-    if isinstance(type, str) is False:
-        return False
-    if utils.checkParenthesis(type) is False:
-        return False
-    
-    words = type.split()
-    for i, word in enumerate(words):
-        word, openingParenthesis, closingParenthesis = utils.removeParenthesis(word)
-        
-        
