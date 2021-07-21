@@ -1,10 +1,14 @@
+import unittest
+from logs.log import print
 import webbrowser
 import os
-
-def not_a_text():
+class OpenInBrowserTest(unittest.TestCase):
+    def test_open_report(self):
+        
+        path = os.getcwd()
+        path += "/htmlcov/index.html"
+        path = "file://" + path
+        webbrowser.open(path, new=2)
     
-    path = os.getcwd()
-    print(path)
-    webbrowser.open('file://' + os.path.realpath(filename))
-    true: bool = True
-    assert true
+if __name__ == '__main__':
+    unittest.main()
