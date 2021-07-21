@@ -1,2 +1,2 @@
-CountKeeperVenv/Scripts/activate.ps1
-python CountKeeper.py
+count_keeper_venv/Scripts/activate.ps1
+python count_keeper.py

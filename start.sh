@@ -1,10 +1,10 @@
-#!/bin/bash -x
+#!/bin/bash
 PWD=`pwd`
 activate () {
-    source $PWD/CountKeeperVenv/bin/activate
+    source $PWD/count_keeper_venv/bin/activate
 }
 
 activate
 
 #!/usr/bin/python3
-python3 CountKeeper.py
+python3 count_keeper.py

@@ -3,7 +3,9 @@ commands/__pycache__
 utils/__pycache__
 events/__pycache__
 /CountKeeperData
-/CountKeeperVenv
+/count_keeper_venv
 CountKeeperData
-CountKeeperVenv
+count_keeper_venv
 .gitmodules
+htmlcov/
+.coverage
