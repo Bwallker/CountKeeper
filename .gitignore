@@ -7,3 +7,5 @@ events/__pycache__
 count_keeper_data
 count_keeper_venv
 .gitmodules
+htmlcov/
+.coverage
