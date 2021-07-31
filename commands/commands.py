@@ -3,9 +3,8 @@ from db import db
 from discord.ext import commands, tasks
 import discord
 from discord import message as msg
-from utils import counting_channels
-from utils import utils
-from utils import discord_utils
+from patterns import counting_channels
+from utils import discord_utils, utils
 from logs.log import print
 
 
@@ -128,7 +127,7 @@ async def notify(ctx, channel_id_or_name):
         channel = discord_utils.get(lambda channel, channelName: channel.name == channelName, ctx.guild.text_channels, channel_name)
         if channel is None:
             raise discord.InvalidArgument("The channel name or id you have provided is invalid")
-    db.add_notification_channel(channel)
+    db.add_notification_channel(channel.guild.id, channel.id)
     message = f'Notification channel has been been set to channel with ID of ({str(channel.id)}) and name of ({channel.name}) in guild {channel.guild.name}'
     await utils.print_and_send(message)
 

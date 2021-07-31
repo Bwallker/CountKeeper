@@ -87,7 +87,7 @@ async def test_get_prefix(bot: CountKeeper):
     message: Message = dpytest.get_message()
     prefix = bot.command_prefix(bot, message)
     assert db.remove_prefix(guild.id)
-        
+    assert prefix is not None
         
 if __name__ == '__main__':
     pytest.main()

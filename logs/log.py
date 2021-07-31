@@ -8,7 +8,6 @@ def print(message: str):
     std.print(message)
 
 
-
 def log(message: str):
     global PATH_TO_LOG_FILES
     with open(f'{PATH_TO_LOG_FILES}/latest.log', 'a') as latest_log:

@@ -1,10 +1,9 @@
-from utils import counting_channels
+from patterns import counting_channels
 from db import db
-from utils import utils
 from discord import Guild as GuildClass
 from events import event_helpers
 import discord
-from utils import discord_utils
+from utils import discord_utils, utils
 from logs.log import print
 #This file contains all the code for how the bot should handle different events
 async def on_ready(bot):

@@ -1,6 +1,7 @@
 from discord.ext.commands import Cog, Bot
 from db import db
-from utils import discord_utils, counting_channels
+from utils import discord_utils
+from patterns import counting_channels
 from logs.log import print
 class Init(Cog):
     def __init__(self, bot: Bot):
