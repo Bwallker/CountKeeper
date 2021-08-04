@@ -1,6 +1,6 @@
 from typing import Optional, Union
 from patterns.statement import Statement
-from patterns.component import BooleanComponent, Component, NumberOfRolesLimitComponents, ReverseComponent, RoleComponent, SimpleComponent
+from patterns.component import BooleanComponent, Component, NumberOfRolesLimitComponent, ReverseComponent, RoleComponent, SimpleComponent
 from patterns.pattern_error import *
 import discord
 from discord.channel import VoiceChannel
@@ -29,7 +29,6 @@ operators = {
 }
 
 
-
 async def update_channel(channel: VoiceChannel, role_number: int, guild: Guild):
     first_number = None
     words = channel.name.split()
@@ -48,10 +47,12 @@ async def update_channel(channel: VoiceChannel, role_number: int, guild: Guild):
     previous_name = channel.name
     try:
         await channel.edit(name=output)
-        print(f"channel {previous_name} renamed to {channel.name} in guild {guild}")
+        print(
+            f"channel {previous_name} renamed to {channel.name} in guild {guild}")
     except discord.errors.Forbidden as e:
-        print(f"discord Forbidden exception raised while trying to rename channel {previous_name} in guild {guild.name}")
-    
+        print(
+            f"discord Forbidden exception raised while trying to rename channel {previous_name} in guild {guild.name}")
+
 
 def is_operator(parts: tuple[str], operators: dict[str, Operator]) -> tuple[Operator, int]:
     try:
@@ -59,7 +60,8 @@ def is_operator(parts: tuple[str], operators: dict[str, Operator]) -> tuple[Oper
         return True
     except NotOperatorError:
         return False
-    
+
+
 def get_operator(parts: tuple[str], operators: dict[str, Operator]) -> Operator:
     """Returns the size of the operator in words and the operator"""
     if not isinstance(parts, tuple) and not isinstance(parts, list):
@@ -75,6 +77,18 @@ def get_operator(parts: tuple[str], operators: dict[str, Operator]) -> Operator:
             return operators.get(operator)()
         index += 1
     raise NotOperatorError(" ".join(parts))
+
+
+def operator_constructor(operator: str, operators: dict[str, Operator]) -> Operator:
+    if not isinstance(operator, str):
+        raise ValueError(
+            f"Operator is not a str, instead it is of type {type(operator)}")
+
+    if operator in operators:
+        return operators.get(operator)()
+    raise NotOperatorError(operator)
+
+
 def pattern_constructor(pattern: str, role_ids_in_guild: list[int], operators: dict[str, Operator], everyone_role_id: int) -> Component:
     """
      Function that checks to see if a pattern is correct
@@ -84,7 +98,7 @@ def pattern_constructor(pattern: str, role_ids_in_guild: list[int], operators: d
      DoubleOperatorError if two words in a row are operators
      NotValidSimpleComponentError if what looks like a SimpleComponent in the pattern is not one
      NotValidNumberOfRolesLimitComponentError if the pattern looks like a SimpleComponent, is a number and is less than 1
-    
+
     """
     if not isinstance(pattern, str):
         raise PatternIsNotStrError
@@ -100,7 +114,7 @@ def pattern_constructor(pattern: str, role_ids_in_guild: list[int], operators: d
         raise MoreOpeningThanClosingParenthesesError(pattern)
     if number_of_closing_parentheses > number_of_opening_parentheses:
         raise MoreClosingThanOpeningParenthesesError(pattern)
-    
+
     words = pattern.split()
     if pattern[0] != "(":
         if len(words) == 1:
@@ -112,7 +126,7 @@ def pattern_constructor(pattern: str, role_ids_in_guild: list[int], operators: d
         raise StatementWithoutOpeningParenthesisError(pattern)
     if pattern[-1] != ")":
         raise StatementWithoutClosingParenthesisError(pattern)
-    
+
     for index, word in enumerate(words):
         word = word.strip()
         if index == 0:
@@ -136,13 +150,57 @@ def pattern_constructor(pattern: str, role_ids_in_guild: list[int], operators: d
             raise LastWordIsoperatorError(pattern)
         if is_in_operators and last_was_operator:
             raise DoubleOperatorError
-        
 
         last_was_operator = is_in_operators
-    
+
     return statement_constructor(pattern, role_ids_in_guild, operators, everyone_role_id)
-    
-def statement_constructor(string: str, role_ids_in_guild: list[int], operators: dict[str, Operator,], everyone_role_id: int) -> Statement:
+
+
+def reverse(string: str) -> str:
+    reversed_string: str = ""
+    for char in reversed(string):
+        reversed_string += char
+    return reversed_string
+
+
+def count_parentheses(string: str) -> str:
+    number_of_opening_parentheses = 0
+    number_of_closing_parentheses = 0
+
+    for index, character in enumerate(string):
+        if character == "(":
+            number_of_opening_parentheses += 1
+        elif character == ")":
+            number_of_closing_parentheses += 1
+        if number_of_opening_parentheses - number_of_closing_parentheses == 0:
+            return string[:index+1]
+    if number_of_closing_parentheses > number_of_opening_parentheses:
+        raise MoreClosingThanOpeningParenthesesError(string)
+    if number_of_opening_parentheses > number_of_closing_parentheses:
+        raise MoreOpeningThanClosingParenthesesError(string)
+
+
+def reverse_count_parentheses(string: str) -> str:
+    reversed_string = reverse(string)
+    number_of_opening_parentheses = 0
+    number_of_closing_parentheses = 0
+    for index, character in enumerate(reversed_string):
+        if character == "(":
+            number_of_opening_parentheses += 1
+        elif character == ")":
+            number_of_closing_parentheses += 1
+        if number_of_opening_parentheses - number_of_closing_parentheses == 0:
+
+            return_slice = len(string) - index - 1
+            return_value = string[return_slice:]
+            return return_value
+    if number_of_closing_parentheses > number_of_opening_parentheses:
+        raise MoreClosingThanOpeningParenthesesError(string)
+    if number_of_opening_parentheses > number_of_closing_parentheses:
+        raise MoreOpeningThanClosingParenthesesError(string)
+
+
+def statement_constructor(string: str, role_ids_in_guild: list[int], operators: dict[str, Operator, ], everyone_role_id: int) -> Statement:
     """
         Constructs a statement from a string
         Raises:
@@ -159,28 +217,45 @@ def statement_constructor(string: str, role_ids_in_guild: list[int], operators: 
         raise StatementWithoutOpeningParenthesisError(string)
     if string[-1] != ")":
         raise StatementWithoutClosingParenthesisError(string)
-    
+
     string = string[1:]
     string = string[:-1]
 
     parts = string.split(",")
-
     if len(parts) < 3:
         raise TooFewCommasInStatementError(string)
-    part1, part2, *rest = parts
-    
-    component_1 = part1.strip()
-    operator = part2.strip()
-    component_2 = ",".join(rest).strip()
 
-    component_1 = component_constructor(component_1, role_ids_in_guild, operators, everyone_role_id)
-    operator = get_operator(operator.split(), operators)
-    component_2 = component_constructor(component_2, role_ids_in_guild, operators, everyone_role_id)
+    if string[0] == "(":
+        component_1_str = count_parentheses(string)
+    else:
+        component_1_str = parts[0].strip()
+
+    component_1 = component_constructor(
+        component_1_str, role_ids_in_guild, operators, everyone_role_id)
+
+    if string[-1] == ")":
+        component_2_str = reverse_count_parentheses(string)
+    else:
+        component_2_str = parts[-1].strip()
+
+    component_2 = component_constructor(
+        component_2_str, role_ids_in_guild, operators, everyone_role_id)
+    # not_operator_part_1 is the first component
+    not_operator_part_1 = len(component_1_str)-1
+    # not_operator_part_2 is the second component
+    not_operator_part_2 = len(string) - len(component_2_str)
+    # We take everything that is not the first or the second component
+    operator_str = string[not_operator_part_1:not_operator_part_2]
+    # We take the stuff that is between the two commas
+    operator_str = operator_str.split(",")[1].strip()
+
+    operator = operator_constructor(operator_str, operators)
+
     return Statement(component_1, operator, component_2)
+
 
 def component_constructor(component: str, role_ids_in_guild: list[int], operators: dict[str, Operator], everyone_role_id) -> Component:
     component = component.strip()
-    
     if component[0] == "(":
         return statement_constructor(component, role_ids_in_guild, operators, everyone_role_id)
     words = component.split()
@@ -188,22 +263,26 @@ def component_constructor(component: str, role_ids_in_guild: list[int], operator
         return word_component_constructor(words[1].strip(), True, role_ids_in_guild, everyone_role_id)
     return word_component_constructor(words[0].strip(), False, role_ids_in_guild, everyone_role_id)
 
+
 def word_component_constructor(word: str, reverse_component: bool, role_ids_in_guild: list[int], everyone_role_id: int) -> Component:
-        """
-        Creates a component from a single word
-        Can create anything but Statements at the moment
-        raises NotValidSimpleComponentError and NotValidNumberOfRolesLimitComponentError if it does not match any known component
-        """
-        
-        component = get_simple_component(word, role_ids_in_guild, everyone_role_id)
-        if reverse_component:
-            return ReverseComponent(component)
-        return component
+    """
+    Creates a component from a single word
+    Can create anything but Statements at the moment
+    raises NotValidSimpleComponentError and NotValidNumberOfRolesLimitComponentError if it does not match any known component
+    """
+
+    component = get_simple_component(word, role_ids_in_guild, everyone_role_id)
+    if reverse_component:
+        return ReverseComponent(component)
+    return component
+
+
 def get_simple_component(word: str, role_ids_in_guild: list[int], everyone_role_id: int) -> SimpleComponent:
     word_as_role_id = word[3:-1]
     TOO_SHORT = len(word) < 5
     for role_id in role_ids_in_guild:
-        if TOO_SHORT: break
+        if TOO_SHORT:
+            break
         if word_as_role_id == str(role_id):
             return RoleComponent(role_id)
     if word == "@everyone":
@@ -214,8 +293,8 @@ def get_simple_component(word: str, role_ids_in_guild: list[int], everyone_role_
         return BooleanComponent(False)
     try:
         int_word = int(word)
-    except ValueError as e:
+    except ValueError:
         raise NotValidSimpleComponentError(word)
     if int_word < 1:
         raise NotValidNumberOfRolesLimitComponentError(word)
-    return NumberOfRolesLimitComponents(word)
+    return NumberOfRolesLimitComponent(int_word)

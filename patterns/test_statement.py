@@ -3,7 +3,7 @@ from component import *
 from operators import *
 def test_statement():
     inner_statement = Statement(RoleComponent(5), AndOperator(), RoleComponent(7))
-    outer_statement = Statement(inner_statement, ExclusiveOrOperator(), NumberOfRolesLimitComponents(3))
+    outer_statement = Statement(inner_statement, ExclusiveOrOperator(), NumberOfRolesLimitComponent(3))
 
     user_1 = {
         5: True,

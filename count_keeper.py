@@ -41,7 +41,10 @@ class CountKeeper(commands.Bot):
         self.add_cog(Init(self))
         for cog in self.get_cogs():
             self.add_cog(cog(self))
-        
+            
+        self.remove_command("help")
+
+
     def command_prefix(self, bot: commands.bot, message: Message) -> str:
         return db.get_prefix(message.guild.id)
     def get_cogs(self, path_to_cogs: str = f'{os.getcwd()}/cogs') -> list:

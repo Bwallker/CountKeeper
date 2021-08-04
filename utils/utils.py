@@ -1,13 +1,14 @@
+from discord.guild import Guild
 from db import db
 from logs.log import print
-def add_prefix_to_guild_if_none(guild):
+def add_prefix_to_guild_if_none(guild: Guild):
     #Called on_guild_join
     #Sets the prefix of a guild to the default prefix if it doesn't have one
     result = db.get_prefix(guild.id)
     if result is None:
         db.add_prefix(guild.id)
 
-def remove_deleted_channels_from_db(guild):
+def remove_deleted_channels_from_db(guild: Guild):
     #Removes deleted channels from the DB that the bot might have previously been tracking when it was in the guild previously
     counting_channel_ids = db.get_channels(guild.id)
     for counting_channel_id in counting_channel_ids:

@@ -30,7 +30,7 @@ def test_role_component():
     assert sum_of_roles == 2
 
 def test_role_count_component():
-    role_count_component = NumberOfRolesLimitComponents(5)
+    role_count_component = NumberOfRolesLimitComponent(5)
     user_1 = {
         1: True,
         2: True,
@@ -107,7 +107,7 @@ def test_reverse_component():
     assert not reverse_true_component.user_applies({})
     assert reverse_false_component.user_applies({})
 
-    role_count_component = NumberOfRolesLimitComponents(3)
+    role_count_component = NumberOfRolesLimitComponent(3)
     reverse_role_count_component = ReverseComponent(role_count_component)
 
     user_1 = {

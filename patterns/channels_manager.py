@@ -2,10 +2,11 @@ from abc import ABC
 import os
 import json
 from typing import Union
-
+from discord.guild import Guild
 from discord.channel import TextChannel, VoiceChannel
 from discord.role import Role
-from patterns.pattern_error import PatternError
+from discord.ext.commands import Context
+from patterns.pattern_error import PatternError, SuccessfullyConstructedComponent
 from patterns.component import AdvancedComponent, Component, SimpleComponent
 from patterns.operators import Operator
 import counting_channels
@@ -110,15 +111,30 @@ def from_dict(as_dict: dict) -> Union[Component, Operator]:
             setattr(instance, annotation, from_dict(value))
     return instance
 
-def create_component(pattern: str, role_ids_in_guild: list[int], everyone_role_id: int, guild_id: int, channel_id: int) -> tuple[str, discord.File]:
+def create_component(pattern: str, role_ids_in_guild: list[int], everyone_role_id: int, guild_id: int, channel_id: int) -> tuple[PatternError, discord.File]:
     try:
         operators = counting_channels.operators
         component = counting_channels.pattern_constructor(
         pattern, role_ids_in_guild, operators, everyone_role_id)
         path_to_file = write_to_file(component, guild_id, channel_id)
-        return "Pattern parsed successfully!\n\nPattern was: {pattern}\n\n", discord.File(fp=path_to_file, filename=f"{channel_id}.json")
+        e = SuccessfullyConstructedComponent(pattern)
+        return e, discord.File(fp=path_to_file, filename=f"{channel_id}.json")
     except PatternError as e:
-        return e.__str__(), None
+        return e, None
+
+def create_component_wrapper(ctx: Context, pattern: str, channel_id: int) -> None:
+    role_ids_in_guild: list[int] = []
+    guild: Guild = ctx.guild
+    for role in guild.roles:
+        role_ids_in_guild.append(role.id)
+    everyone_role_id = guild.default_role.id
+    guild_id = guild.id
+
+
+
+    exception, file = create_component(pattern, role_ids_in_guild, everyone_role_id, guild_id, channel_id)
+
+    ctx.send(exception.__str__(), file=file)
 
 
 def update_channels(guild: discord.Guild) -> dict[int, int]:

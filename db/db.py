@@ -9,7 +9,7 @@ PATH_TO_CHANNELS = "count_keeper_data/channels.sqlite"
 PATH_TO_NOTIFIED = "count_keeper_data/notify.sqlite"
 
 
-def get_prefix(guild_id: int):
+def get_prefix(guild_id: int) -> str:
     global PATH_TO_PREFIXES
     try:
         prefixes = sqlite3.connect(PATH_TO_PREFIXES)
@@ -29,7 +29,7 @@ def get_prefix(guild_id: int):
     return prefix
 
 
-def add_prefix(guild_id: int):
+def add_prefix(guild_id: int) -> bool:
     global DEFAULT_PREFIX, PATH_TO_PREFIXES
     guild_id = str(guild_id)
     try:
@@ -46,7 +46,7 @@ def add_prefix(guild_id: int):
     return successful
 
 
-def change_prefix(guild_id: int, prefix):
+def change_prefix(guild_id: int, prefix) -> bool:
     global PATH_TO_PREFIXES
     guild_id = str(guild_id)
     if (isinstance(prefix, int) is False and isinstance(prefix, str) is False):
@@ -69,7 +69,7 @@ def change_prefix(guild_id: int, prefix):
     return successful
 
 
-def remove_prefix(guild_id: int):
+def remove_prefix(guild_id: int) -> bool:
     global PATH_TO_PREFIXES
     guild_id = str(guild_id)
     try:
@@ -86,7 +86,7 @@ def remove_prefix(guild_id: int):
     return successful
 
 
-def get_pattern(channel_id: int):
+def get_pattern(channel_id: int) -> str:
     global PATH_TO_CHANNELS
     channels = sqlite3.connect(PATH_TO_CHANNELS)
     cursor = channels.cursor()
@@ -103,7 +103,7 @@ def get_pattern(channel_id: int):
     return pattern
 
 
-def add_pattern(channel: ChannelClass, pattern: str):
+def add_pattern(channel: ChannelClass, pattern: str) -> bool:
     global PATH_TO_CHANNELS
     try:
         channels = sqlite3.connect(PATH_TO_CHANNELS)
@@ -119,7 +119,7 @@ def add_pattern(channel: ChannelClass, pattern: str):
     return successful
 
 
-def change_pattern(channel: ChannelClass, pattern: str):
+def change_pattern(channel: ChannelClass, pattern: str) -> bool:
     global PATH_TO_CHANNELS
     target_pattern = get_pattern(channel.id)
     if target_pattern is None:
@@ -138,7 +138,7 @@ def change_pattern(channel: ChannelClass, pattern: str):
     return successful
 
 
-def delete_channel(channel_id: int):
+def delete_channel(channel_id: int) -> bool:
     global PATH_TO_CHANNELS
     channel_id = str(channel_id)
     try:
@@ -155,7 +155,7 @@ def delete_channel(channel_id: int):
     return successful
 
 
-def get_channel_patterns(guild_id: int):
+def get_channel_patterns(guild_id: int) -> dict[int, str]:
     global PATH_TO_CHANNELS
     guild_id = str(guild_id)
     channels = sqlite3.connect(PATH_TO_CHANNELS)
@@ -182,7 +182,7 @@ def get_channel_patterns(guild_id: int):
     return channel_pattern
 
 
-def get_channels(guild_id: int):
+def get_channels(guild_id: int) -> list[int]:
     global PATH_TO_CHANNELS
     guild_id = str(guild_id)
     channels = sqlite3.connect(PATH_TO_CHANNELS)
@@ -200,7 +200,7 @@ def get_channels(guild_id: int):
     return channel_ids
 
 
-def add_notification_channel(guild_id: int, channel_id: int):
+def add_notification_channel(guild_id: int, channel_id: int) -> bool:
     global PATH_TO_NOTIFIED
     try:
         notified = sqlite3.connect(PATH_TO_NOTIFIED)
@@ -216,7 +216,7 @@ def add_notification_channel(guild_id: int, channel_id: int):
     return successful
 
 
-def remove_notification_channel(channel_id: int):
+def remove_notification_channel(channel_id: int) -> bool:
     global PATH_TO_NOTIFIED
     try:
         notified = sqlite3.connect(PATH_TO_NOTIFIED)
