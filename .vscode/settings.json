@@ -1,0 +1,14 @@
+{
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.pythonPath": "",
+    "python.languageServer": "Pylance",
+    "python.analysis.extraPaths": [
+        "./",
+        "CountKeeper/",
+        "./logs",
+        "CountKeeper/logs"
+    ],
+    "python.linting.banditEnabled": false,
+    "python.linting.pylintPath": "${workspaceFolder}/count_keeper_venv/Scripts/pylint.exe"
+}

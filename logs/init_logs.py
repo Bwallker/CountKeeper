@@ -8,17 +8,17 @@ from os.path import join, isfile
 cwd = os.getcwd()
 from utils import std
 from utils import config
-path_to_log_files = f'{cwd}/CountKeeperData/logs'
-path_to_last_run_time = f'{path_to_log_files}/util_files/last_run_time.txt'
+PATH_TO_LOG_FILES = f'{cwd}/count_keeper_data/logs'
+PATH_TO_LAST_RUN_TIME = f'{PATH_TO_LOG_FILES}/util_files/last_run_time.txt'
 
 def set_last_time(last_time: str) -> None:
-    global path_to_last_run_time
-    with open(path_to_last_run_time, 'w') as last_run_time_file:
+    global PATH_TO_LAST_RUN_TIME
+    with open(PATH_TO_LAST_RUN_TIME, 'w') as last_run_time_file:
         last_run_time_file.write(last_time)
 
 def get_last_time() -> str:
-    global path_to_last_run_time
-    with open(path_to_last_run_time, 'r') as last_run_time_file:
+    global PATH_TO_LAST_RUN_TIME
+    with open(PATH_TO_LAST_RUN_TIME, 'r') as last_run_time_file:
         last_run_time = last_run_time_file.read()
     return last_run_time
 
@@ -27,8 +27,8 @@ def init():
     last_time = get_last_time()
     print(last_time)
     #Rename latest log to its permanent name, that is the time the bot started for that particular run
-    latest_log = f'{path_to_log_files}/latest.log'
-    renamed_latest_log = f'{path_to_log_files}/{last_time}.log'
+    latest_log = f'{PATH_TO_LOG_FILES}/latest.log'
+    renamed_latest_log = f'{PATH_TO_LOG_FILES}/{last_time}.log'
     os.rename(latest_log, renamed_latest_log)
     start_time_str = make_start_time_file_name_friendly(start_time)
     print(start_time_str)
@@ -37,15 +37,15 @@ def init():
     delete_oldest_log(config.LOG_LIMIT, log_files)
     
 def get_log_files() -> list[str]:
-    global path_to_log_files
+    global PATH_TO_LOG_FILES
     files: list[str] = []
-    for file in os.listdir(path_to_log_files):
-        if isfile(join(path_to_log_files, file)):
+    for file in os.listdir(PATH_TO_LOG_FILES):
+        if isfile(join(PATH_TO_LOG_FILES, file)):
             files.append(file)
     return files
         
 def delete_oldest_log(limit: int, log_files: list[str]) -> None:
-    global path_to_log_files
+    global PATH_TO_LOG_FILES
     if len(log_files) < limit:
         return
     datetimes: list[datetime.datetime] = []
@@ -71,7 +71,7 @@ def delete_oldest_log(limit: int, log_files: list[str]) -> None:
         datetime_str += ".log"
         
         print(datetime_str)
-        os.remove(f'{path_to_log_files}/{datetime_str}')
+        os.remove(f'{PATH_TO_LOG_FILES}/{datetime_str}')
         i += 1
         length -= 1
         

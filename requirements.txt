@@ -1,1 +1,6 @@
 discord
+Coverage
+pytest
+pytest-cov
+pytest-asyncio
+dpytest
