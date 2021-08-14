@@ -10,5 +10,14 @@
         "CountKeeper/logs"
     ],
     "python.linting.banditEnabled": false,
-    "python.linting.pylintPath": "${workspaceFolder}/count_keeper_venv/Scripts/pylint.exe"
+    "python.linting.pylintPath": "${workspaceFolder}/count_keeper_venv/Scripts/pylint.exe",
+    "sqltools.connections": [
+        {
+            "previewLimit": 100,
+            "driver": "SQLite",
+            "name": "Channels",
+            "database": "${workspaceFolder:CountKeeper}/count_keeper_data/channels.sqlite"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
 }

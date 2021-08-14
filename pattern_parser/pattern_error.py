@@ -14,7 +14,8 @@ class PatternError(Exception):
         if index_of_error is None:
             index_of_error = int(len(pattern_with_error)/2)
         if index_of_error < 0:
-            index_of_error = 0
+            index_of_error = len(pattern_with_error) - index_of_error
+        index_of_error = int(index_of_error)
         self.__index_of_error = index_of_error
 
     def __str__(self):
@@ -100,10 +101,10 @@ class NotValidSimpleComponentError(PatternError):
     """
 
     def get_error_description(self) -> str:
-        return "Your pattern was interpreted as being a simple pattern, but it could not be parsed to a valid simple component"
+        return "This component was interpreted as being a simple pattern, but it could not be parsed to a valid simple component"
 
 
-class NotValidNumberOfRolesLimitComponentError(PatternError):
+class NotValidRolesLimitComponentError(PatternError):
     """
         Exception raised if a SimpleComponent is made from a word that is a number, but less than one.
         This indicates that the user was trying to create a NumberOfRolesLimitComponent with an invalid number of roles
@@ -111,6 +112,15 @@ class NotValidNumberOfRolesLimitComponentError(PatternError):
 
     def get_error_description(self) -> str:
         return "Your role count component has a role count of less than 1"
+
+
+class NotValidComparatorError(PatternError):
+    """
+        Exception raised if a comparator provided with a rolelimitcomponent is not valid
+    """
+
+    def get_error_description(self) -> str:
+        return "This role limit component did not come with a valid comparator"
 
 
 class MoreOpeningThanClosingParenthesesError(PatternError):
@@ -166,12 +176,3 @@ class RoleNotInRolesError(PatternError):
 
     def get_error_description(self) -> str:
         return "Your pattern contains a role component that points to a role that no longer exists"
-
-
-class SuccessfullyConstructedComponent(PatternError):
-    """
-        "Exception" that is raised if a pattern was succesfully parsed into a component
-    """
-
-    def __str__(self):
-        return f"Pattern parsed successfully!\n\nPattern was: {super().get_pattern_with_error()}\n\nThe constructed component has been appended to this message in json format, incase you wish to verify for yourself that it is correct"

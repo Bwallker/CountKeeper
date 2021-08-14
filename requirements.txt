@@ -4,3 +4,5 @@ pytest
 pytest-cov
 pytest-asyncio
 dpytest
+pylint
+pympler

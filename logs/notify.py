@@ -15,7 +15,7 @@ def get_notified_channel(guild: Guild):
     for channel in guild.text_channels:
         if channel.id == notified_channel_id:
             return channel
-    db.remove_notification_channel(notified_channel_id)
+    db.remove_notification_channel(guild.id)
     return None
 
 

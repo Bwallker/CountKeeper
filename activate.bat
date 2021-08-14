@@ -1,0 +1,1 @@
+CALL ./count_keeper_venv/Scripts/activate.bat

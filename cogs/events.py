@@ -1,5 +1,7 @@
+from inspect import EndOfBlock
 from discord.abc import GuildChannel
 from discord.channel import VoiceChannel
+from discord.errors import DiscordException
 from discord.ext.commands import Cog, Bot
 from discord.guild import Guild
 from discord.member import Member
@@ -8,6 +10,8 @@ from db import db
 from cogs import event_helpers
 from utils import utils
 from logs.log import print
+import patterns.channels_manager as channel_manager
+from patterns.simple_discord import SimpleMessage
 
 
 class Events(Cog):
@@ -20,8 +24,17 @@ class Events(Cog):
         utils.remove_deleted_channels_from_db(guild)
         print(f"Bot joined guild {guild.name} (ID:) {guild.id}")
         logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.bot_add).flatten()
+
         inviter = logs[0].user
-        await inviter.send(embed=event_helpers.guild_join_message(inviter, guild))
+        embeds = event_helpers.guild_join_message(self.bot.user.avatar_url)
+        for embed in embeds:
+            try:
+                await inviter.send(embed=embed)
+            except DiscordException as e:
+                print(embed.__repr__())
+                print(embed.__str__())
+                print(e.__repr__())
+                print(e.__str__())
 
     @Cog.listener('on_guild_leave')
     async def on_guild_leave(self, guild):
@@ -38,36 +51,43 @@ class Events(Cog):
 
     @Cog.listener('on_member_update')
     async def on_member_update(self, before: Member, after: Member):
+        guild: Guild = before.guild
         if before.roles == after.roles:
             return
         before_set = set(before.roles)
         after_set = set(after.roles)
         before_but_not_after = before_set - after_set
         after_but_not_before = after_set - before_set
-        print(f"Member {after.display_name} in guild {after.guild.name} has lost the following roles:")
+        await self.bot.send_to_notified(guild, SimpleMessage(content=f"Member {after.display_name} in guild {after.guild.name} has lost the following roles:"))
+        print(
+            f"Member {after.display_name} in guild {after.guild.name} has lost the following roles:")
         for role in before_but_not_after:
             print(role.name)
-        print(f"Member {after.display_name} in guild {after.guild.name} has gained the following roles:")
+            await self.bot.send_to_notified(guild, SimpleMessage(content=role.name))
+        await self.bot.send_to_notified(guild, SimpleMessage(content=f"Member {after.display_name} in guild {after.guild.name} has gained the following roles:"))
+        print(
+            f"Member {after.display_name} in guild {after.guild.name} has gained the following roles:")
         for role in after_but_not_before:
             print(role.name)
-        # if before.roles != after.roles:
-        # await counting_channels.calculate_channels(after, "role changed", None, after.guild)
+            await self.bot.send_to_notified(guild, SimpleMessage(content=role.name))
+        await channel_manager.update_channels(guild, self.bot.get_notified_channel(guild))
 
     @Cog.listener('on_member_join')
     async def on_member_join(self, member: Member):
+        guild: Guild = member.guild
+        await self.bot.send_to_notified(guild, SimpleMessage(content=f"Member {member.display_name} joined guild {member.guild.name}"))
         print(f"Member {member.display_name} joined guild {member.guild.name}")
-        # await counting_channels.calculate_channels(member, "member joined", None, member.guild)
+        await channel_manager.update_channels(guild, self.bot.get_notified_channel(guild))
 
     @Cog.listener('on_member_remove')
     async def on_member_remove(self, member: Member):
+        guild: Guild = member.guild
         print(f"Member {member.display_name} left guild {member.guild.name}")
-        # await counting_channels.calculate_channels(member, "member left", None, member.guild)
+        await self.bot.send_to_notified(guild, SimpleMessage(content=f"Member {member.display_name} left guild {member.guild.name}"))
+        await channel_manager.update_channels(member.guild, self.bot.get_notified_channel(guild))
 
     @Cog.listener('on_guild_channel_delete')
     async def on_guild_channel_delete(self, channel: GuildChannel):
         print(f"Channel {channel.name} deleted in guild {channel.guild.name}")
-        # if not isinstance(channel, VoiceChannel): return
-        #pattern = db.get_pattern(channel.id)
-        # if pattern != None:
-        # db.delete_channel(channel.id)
-        #print(f"Counting Channel {channel} deleted in guild {channel.guild}")
+        await self.bot.send_to_notified(channel.guild, SimpleMessage(content=f"Channel {channel.name} deleted in guild {channel.guild.name}"))
+        db.remove_pattern(channel.id)
