@@ -168,11 +168,3 @@ class TooFewCommasInStatementError(PatternError):
         return "This statement contained less than 2 commas"
 
 
-class RoleNotInRolesError(PatternError):
-    """
-        Exception that gets thrown if a role in a statement is not a part of the roles of the guild
-        Generally means that a pattern has not been properly cleaned up after a role was deleted
-    """
-
-    def get_error_description(self) -> str:
-        return "Your pattern contains a role component that points to a role that no longer exists"

@@ -1,7 +1,7 @@
 from utils.utils import remove_deleted_channels_from_db
 from discord.ext.commands import Cog, Bot
 from db import db
-from patterns import channels_manager
+from pattern_parser import channels_manager
 from logs.log import print
 
 

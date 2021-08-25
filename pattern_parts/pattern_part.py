@@ -20,7 +20,7 @@ def get_members(thing) -> dict:
             continue
 
         if (isinstance(value, PatternPart)):
-            members[key] = value.to_dict()
+            members[key] = value.__repr__()
         else:
             members[key] = value
     return members
@@ -46,3 +46,9 @@ class PatternPart(ABC):
         if type(self) != type(other):
             return False
         return get_members(self) == get_members(other)
+
+    def __ge__(self, other):
+        """
+            For parts, the >= method represents wheter the other component is equal to self, or if it is "greater" than self, in the sense that it always true when self is true, but sometimes it may be true even when self is false 
+        """
+        return self.__eq__(other)

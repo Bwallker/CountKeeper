@@ -1,7 +1,7 @@
 from discord.guild import Guild
 import importlib.util
 import os
-from patterns.simple_discord import SimpleMessage
+from pattern_parser.simple_discord import SimpleMessage
 from typing import Callable
 from discord.channel import TextChannel
 

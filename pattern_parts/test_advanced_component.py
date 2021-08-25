@@ -1,8 +1,9 @@
-from patterns.simple_discord import SimpleGuild
-from patterns.comparators import LessThanOrEqualToLimitComparator, NotEqualToLimitComparator
+from pattern_parser.simple_discord import SimpleGuild
+from pattern_parts.comparator_implementation import LessThanOrEqualToLimitComparator, NotEqualToLimitComparator
 from advanced_component import *
 from simple_component import *
 from operators import *
+from logs.log import print
 """members = [
                 0SimpleMember(
                     {

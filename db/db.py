@@ -1,5 +1,5 @@
-from patterns.components import Component
-from patterns import pickle_handler
+from pattern_parts.components import Component
+import db.pickle_handler as pickle_handler
 from utils import config
 from logs.log import print
 from unittest.signals import installHandler

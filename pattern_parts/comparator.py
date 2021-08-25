@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractstaticmethod
 from pattern_parts.pattern_part import PatternPart
 from logs.log import print
 from typing import TypeVar
@@ -6,8 +6,6 @@ comparator = TypeVar("comparator", bound="Comparator")
 
 COMPARATORS_REPRS = {}
 REVERSE_COMPARATORS = {}
-
-
 
 
 class Comparator(PatternPart):
@@ -24,11 +22,17 @@ class Comparator(PatternPart):
         """
 
     def __hash__(self) -> int:
-        return hash(type(self))
+        return hash(type(self)) ^ hash(self._role_limit)
 
     def __eq__(self, other):
-        return type(self) == type(other)
+        return type(self) == type(other) and self._role_limit == other._role_limit
 
+    def __ge__(self, other):
+        if self.__eq__(other):
+            return True
+        if not type(self) == type(other):
+            return False
+        return self.__gt__(other)
     def __repr__(self) -> str:
         return f"{COMPARATORS_REPRS[type(self)]} {self._role_limit}"
 
@@ -36,10 +40,9 @@ class Comparator(PatternPart):
         return self
 
     def reverse(self) -> comparator:
+
         for comparator_class_1, comparator_class_2 in REVERSE_COMPARATORS.items():
             if comparator_class_1 == type(self):
                 return comparator_class_2(self._role_limit).simplify()
             if comparator_class_2 == type(self):
                 return comparator_class_1(self._role_limit).simplify()
-
-    

@@ -1,6 +1,6 @@
-from patterns.simple_discord import create_simple_guild, SimpleGuild
-from patterns.pattern import PatternParams
-from patterns.pattern_error import PatternError
+from pattern_parser.simple_discord import create_simple_guild, SimpleGuild
+from pattern_parser.pattern import PatternParams
+from pattern_parser.pattern_error import PatternError
 import discord
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot, command, Context
@@ -10,13 +10,11 @@ from discord.guild import Guild
 from discord.member import Member
 
 from db import db
-from patterns import channels_manager
 
 from logs.log import print
-import patterns.counting_channels as counting_channels
-import patterns.channels_manager as channels_manager
+import pattern_parser.counting_channels as counting_channels
+import pattern_parser.channels_manager as channels_manager
 import os
-import patterns.optimizer as opt
 import shutil
 
 
@@ -52,7 +50,7 @@ class CountingChannelsCommands(Cog):
         except PatternError as e:
             await ctx.send(e.__str__())
             return
-        optimized_component = opt.optimize(unoptimized_component)
+        #optimized_component = opt.optimize(unoptimized_component)
 
         channel = await guild.create_voice_channel(name)
         db.add_pattern(ctx.guild.id, channel.id, optimized_component)

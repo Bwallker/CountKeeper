@@ -1,9 +1,9 @@
-from patterns.pattern_part import *
-from patterns.comparators import *
-from patterns.components import *
-from patterns.simple_component import *
-from patterns.advanced_component import *
-from patterns.operators import *
+from pattern_parts.pattern_part import *
+from pattern_parts.comparator_implementation import *
+from pattern_parts.components import *
+from pattern_parts.simple_component import *
+from pattern_parts.advanced_component import *
+from pattern_parts.operators import *
 import pickle
 
 

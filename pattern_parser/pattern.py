@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from patterns.simple_discord import SimpleGuild
-from patterns.operators import *
-from patterns.comparators import *
+from pattern_parser.simple_discord import SimpleGuild
+from pattern_parts.operators import *
+from pattern_parts.comparator_implementation import *
+from pattern_parts.comparator import *
 OPERATORS = {
     "and": AndOperator,
     "nand": NotAndOperator,
@@ -25,7 +26,7 @@ COMPARATORS = {
     "<": LessThanLimitComparator,
     "=": EqualToLimitComparator,
     "==": EqualToLimitComparator,
-    "!=)": NotEqualToLimitComparator,
+    "!=": NotEqualToLimitComparator,
     "=/=": NotEqualToLimitComparator
 }
 

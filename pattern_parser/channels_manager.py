@@ -1,10 +1,11 @@
+from pattern_parts.simple_component import RoleNotInRolesError
 from discord.abc import Messageable
 from discord.guild import Guild
 from discord.channel import VoiceChannel
 from logs.log import print
 import db.db as db
-from patterns.simple_discord import create_simple_guild
-import patterns.counting_channels as counting_channels
+from pattern_parser.simple_discord import create_simple_guild
+import pattern_parser.counting_channels as counting_channels
 
 
 async def update_channels(guild: Guild, reply_target: Messageable) -> dict[str, str]:
@@ -22,8 +23,12 @@ async def update_channels(guild: Guild, reply_target: Messageable) -> dict[str, 
     changes: dict[str, str] = {}
     for channel in guild.voice_channels:
         if channel.id in tracked_channels:
-            changes.update(await counting_channels.update_channel(
-                channel, results[channel.id], guild))
+            try:
+                result = await counting_channels.update_channel(channel, results[channel.id], guild)
+                changes.update(result)
+            except RoleNotInRolesError:
+                db.remove_pattern(channel.id)
+                await reply_target.send(f"Removed channel {channel.name} from tracked channels because its pattern contained a role that doesn't exist anymore")
     changes_as_str = ""
     for key, value in changes.items():
         changes_as_str += key + " -> " + value + "\n"

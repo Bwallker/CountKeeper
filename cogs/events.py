@@ -10,8 +10,8 @@ from db import db
 from cogs import event_helpers
 from utils import utils
 from logs.log import print
-import patterns.channels_manager as channel_manager
-from patterns.simple_discord import SimpleMessage
+import pattern_parser.channels_manager as channel_manager
+from pattern_parser.simple_discord import SimpleMessage
 
 
 class Events(Cog):

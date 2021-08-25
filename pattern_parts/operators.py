@@ -3,7 +3,7 @@ import sys
 from abc import abstractmethod
 from types import ModuleType
 from typing import TypeVar
-from patterns.pattern_part import PatternPart
+from pattern_parts.pattern_part import PatternPart
 from logs.log import print
 OPERATOR_MODULE = sys.modules[__name__]
 OPERATORS_REPR = {}

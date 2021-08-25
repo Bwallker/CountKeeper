@@ -1,12 +1,12 @@
 from abc import abstractmethod
-from patterns.pattern import PatternParams
-from patterns.comparators import GreaterThanOrEqualToLimitComparator, LessThanOrEqualToLimitComparator
-from patterns.operators import AndOperator, ExclusiveOrOperator, NotExclusiveOrOperator, NotOrOperator, OrOperator
-from patterns.advanced_component import ReverseComponent, Statement
-from patterns.simple_component import BooleanComponent, BotComponent, RoleComponent, RolesLimitComponent
-from patterns.components import Component
-from patterns.pattern_error import MoreOpeningThanClosingParenthesesError, NotValidSimpleComponentError
-from patterns.counting_channels import PatternError, get_simple_component, operator_constructor, pattern_constructor
+from pattern_parser.pattern import PatternParams
+from pattern_parts.comparator_implementation import GreaterThanOrEqualToLimitComparator, LessThanOrEqualToLimitComparator
+from pattern_parts.operators import AndOperator, ExclusiveOrOperator, NotExclusiveOrOperator, NotOrOperator, OrOperator
+from pattern_parts.advanced_component import ReverseComponent, Statement
+from pattern_parts.simple_component import BooleanComponent, BotComponent, RoleComponent, RolesLimitComponent
+from pattern_parts.components import Component
+from pattern_parser.pattern_error import MoreOpeningThanClosingParenthesesError, NotValidSimpleComponentError
+from pattern_parser.counting_channels import PatternError, get_simple_component, operator_constructor, pattern_constructor
 from logs.log import print
 import pickle
 import time
@@ -56,12 +56,12 @@ def test_pattern_verifier_2():
         AndOperator(),
         ReverseComponent(RoleComponent(2))
     )
-    successful_pattern_test_template("(not <= 1,and,not aaa2a)", correct)
+    successful_pattern_test_template("(not <= 1,and,not <@&2>)", correct)
 
 
 def test_pattern_verifier_3():
     correct = RoleComponent(1)
-    successful_pattern_test_template("aaa1a", correct)
+    successful_pattern_test_template("<@&1>", correct)
 
 
 def test_pattern_verifier_4():
@@ -80,7 +80,7 @@ def test_pattern_verifier_4():
     )
 
     successful_pattern_test_template(
-        "(true, and, (true, and, (aaa2a, and, aaa3a)))", correct)
+        "(true, and, (true, and, (<@&2>, and, <@&3>)))", correct)
 
 
 def test_pattern_verifier_5():
@@ -103,7 +103,7 @@ def test_pattern_verifier_5():
         )
     )
     successful_pattern_test_template(
-        "(false, or,(<= 1, not inclusive or,(aaa10a,not exclusive or,(true, and, <= 3))))", correct)
+        "(false, or,(<= 1, not inclusive or,(<@&10>,not exclusive or,(true, and, <= 3))))", correct)
 
 
 def test_pattern_verifier_6():
@@ -160,7 +160,7 @@ def test_pattern_verifier_10():
         )
     )
     successful_pattern_test_template(
-        "(((aaa1a, and, aaa3a), not exclusive or, aaa2a), exclusive or, (<= 1, not or, (<= 1, and, <= 3)))", correct)
+        "(((<@&1>, and, <@&3>), not exclusive or, <@&2>), exclusive or, (<= 1, not or, (<= 1, and, <= 3)))", correct)
 
 
 def test_pattern_verifier_11():
@@ -183,7 +183,7 @@ def test_pattern_verifier_11():
     )
 
     successful_pattern_test_template(
-        "(bot, not or, ((bot, and, aaa3a), nxor, (bot, or, >= 3)))", correct
+        "(bot, not or, ((bot, and, <@&3>), nxor, (bot, or, >= 3)))", correct
     )
 
 
@@ -194,13 +194,12 @@ def test_pattern_verifier_12():
 
 def test_pattern_verifier_13():
     pattern_test_template(
-        "(bot, not or, ((bot, and, aaa3a), nxor, (bot, or, > = 3)))")
+        "(bot, not or, ((bot, and, <@&3>), nxor, (bot, or, > = 3)))")
 
 
 def test_get_simple_component_errors():
-    #params = PatternParams("(bot, not or, ((bot, and, aaa3a), nxor, (bot, or, > = 3)))", )
     print("Running test_get_simple_component_errors")
-    pattern = "(bot, not or, ((bot, and, aaa3a), nxor, (bot, or, > = 3)))"
+    pattern = "(bot, not or, ((bot, and, <@&3>), nxor, (bot, or, > = 3)))"
     current_part = " > = 3"
     index_of_current_part = 49
     params = PatternParams(pattern, index_of_current_part,
@@ -212,7 +211,7 @@ def test_get_simple_component_errors():
 
 
 def test_get_operator_constructor():
-    pattern = "(bot, not orr, ((bot, and, aaa3a), nxor, (bot, or, > = 3)))"
+    pattern = "(bot, not orr, ((bot, and, <@&3>), nxor, (bot, or, > = 3)))"
     current_part = " not orr"
     index_of_current_part = 4
     params = PatternParams(pattern, index_of_current_part,

@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar
-from patterns.simple_discord import SimpleMember
-from patterns.pattern_error import *
+from pattern_parser.simple_discord import SimpleMember
+from pattern_parser.pattern_error import *
 from json import JSONEncoder, dumps
 import inspect
-from patterns.pattern_part import PatternPart
+
+from pattern_parts.pattern_part import PatternPart
 
 component = TypeVar("component", bound="Component")
 Statement = TypeVar("Statement")
@@ -33,20 +34,15 @@ class Component(PatternPart):
         """
             Abstract method that returns the reverse of self
         """
-    #@abstractmethod
-    def optimize(self, super_component: component) -> component:
+    # @abstractmethod
+
+    def optimize(self, super_component: component) -> tuple[component, bool]:
         """
             method that returns an optimized version of self
-        """                       
+        """
 
     def simplify(self) -> component:
         """
             Returns a simplified version of self
         """
         return self
-
-    @abstractmethod
-    def from_string(self)
-    """
-        Parses self from string
-    """

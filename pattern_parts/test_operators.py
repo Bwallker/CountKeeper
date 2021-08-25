@@ -1,4 +1,4 @@
-from operators import *
+from pattern_parts.operators import *
 
 
 def operator_test_template(operator: Operator, ff: bool, tf: bool, ft: bool, tt: bool) -> None:

@@ -1,17 +1,15 @@
 
-from patterns.pattern import PatternParams
+from pattern_parser.pattern import PatternParams
 
-from patterns.advanced_component import ReverseComponent, Statement
-from patterns.simple_component import BooleanComponent, BotComponent, RoleComponent, RolesLimitComponent, SimpleComponent
-from patterns.components import Component
-from patterns.pattern_error import *
+from pattern_parts.advanced_component import ReverseComponent, Statement
+from pattern_parts.simple_component import BooleanComponent, BotComponent, RoleComponent, RolesLimitComponent, SimpleComponent
+from pattern_parts.components import Component
+from pattern_parser.pattern_error import *
 import discord
 from discord.channel import VoiceChannel
 from discord import Guild
-from db import db
-from utils import utils
 from logs.log import print
-from patterns.operators import Operator
+from pattern_parts.operators import Operator
 # This file contains helper functions for updating the channels
 
 
@@ -333,13 +331,11 @@ def word_component_constructor(params: PatternParams, reverse_component: bool) -
 
 def get_simple_component(params: PatternParams) -> SimpleComponent:
     word = params.current_part
-    word_as_role_id = word[3:-1]
-    TOO_SHORT = len(word) < 5
-    for role_id in params.guild.roles():
-        if TOO_SHORT:
-            break
-        if word_as_role_id == str(role_id):
-            return RoleComponent(role_id)
+    if word.startswith("<@&") and word.endswith(">"):
+        word_as_role_id = word[3:-1]
+        for role_id in params.guild.roles():
+            if word_as_role_id == str(role_id):
+                return RoleComponent(role_id)
 
     if word == "@everyone":
         return RoleComponent(params.guild.everyone_role())

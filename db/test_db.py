@@ -1,7 +1,7 @@
-from patterns.operators import AndOperator, OrOperator
-from patterns.simple_component import BooleanComponent
-from patterns.advanced_component import Statement
-from db import db
+from pattern_parts.operators import AndOperator, OrOperator
+from pattern_parts.simple_component import BooleanComponent
+from pattern_parts.advanced_component import Statement
+import db.db as db
 import utils.config as config
 
 
