@@ -17,6 +17,7 @@ class PatternError(Exception):
             index_of_error = len(pattern_with_error) - index_of_error
         index_of_error = int(index_of_error)
         self.__index_of_error = index_of_error
+        print(f"Index of error in constructor is {index_of_error}")
 
     def __str__(self):
         output: str = self.__pattern_with_error
@@ -31,7 +32,8 @@ class PatternError(Exception):
         output: str = ""
         RANGE = len(self.__pattern_with_error)
         for i in range(RANGE):
-            output += ("^" if i == self.__index_of_error else " ")
+            print(i)
+            output += ("^" if i == self.__index_of_error+2 else " ")
         return output
 
     def get_error_description(self) -> str:
@@ -166,5 +168,3 @@ class TooFewCommasInStatementError(PatternError):
 
     def get_error_description(self) -> str:
         return "This statement contained less than 2 commas"
-
-

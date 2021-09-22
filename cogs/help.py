@@ -37,10 +37,10 @@ class Help(Cog):
         await ctx.send(embed=embed)
 
     def help_brief_text(self, _: str):
-        return "Provides descriptions for the commands avialable to the bot"
+        return "Provides descriptions for the commands available to the bot"
 
     def help_help_text(self, _: str):
-        return "Briefly describes all the commands avialable to the bot if called without arguments, and provides a detailed description of a command if called with the name of that command as an argument"
+        return "Briefly describes all the commands available to the bot if called without arguments, and provides a detailed description of a command if called with the name of that command as an argument"
 
     def help_generic_embed(self, guild_id: int, profile_pic: Asset):
         prefix = db.get_prefix(guild_id)

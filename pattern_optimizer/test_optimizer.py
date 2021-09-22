@@ -123,28 +123,3 @@ def test_statement_optimize_2():
     print("ASDDADSD")
     print(optimized)
     assert GUILD.get_result(statement) == GUILD.get_result(optimized)
-
-
-def work():
-    my_number = 0
-    for _ in range(100):
-        my_number += random.randint(1, 1000)
-
-
-def start_processes(amount: int, target: Callable):
-    processes: list[Process] = []
-    for _ in range(amount):
-        process = Process(target=target)
-        processes.append(process)
-        process.start()
-    for process in processes:
-        process.join()
-
-
-def test_kill_system():
-    start_time = time.time_ns()
-    start_processes(1000, work)
-    end_time = time.time_ns()
-    delta_t = end_time-start_time
-    delta_t /= 1000000
-    print(f"Took {delta_t} miliseconds to finish all processes")

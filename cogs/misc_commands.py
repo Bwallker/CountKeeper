@@ -1,4 +1,5 @@
 from typing import Union
+from discord import embeds
 from discord.channel import TextChannel
 from discord.ext.commands.errors import CommandError, MissingRequiredArgument
 from discord.guild import Guild
@@ -8,8 +9,11 @@ from discord.ext import commands
 from discord.ext.commands import Cog, Bot, command, Context
 import discord
 
-from utils import utils
+import utils.utils as utils
+import utils.config as config
+import cogs.event_helpers as event_helpers
 from logs.log import print
+
 
 class MiscCommands(Cog):
     def __init__(self, bot: Bot):
@@ -195,5 +199,147 @@ class MiscCommands(Cog):
             await ctx.send("You gave this command more than one arguments")
         elif isinstance(error, MissingRequiredArgument):
             await ctx.send("You didn't give this command anything to ape")
+        else:
+            raise error
+
+# -----------------------------------------------------------------------------------------
+
+    @command(name="intro")
+    async def intro(self, ctx: Context) -> None:
+        embeds = event_helpers.guild_join_message(self.bot.user.avatar_url)
+        for embed in embeds:
+            await ctx.send(embed=embed)
+
+# -----------------------------------------------------------------------------------------
+
+    @command(name="operators")
+    async def operators(self, ctx: Context) -> None:
+        author_name = config.BOT_NAME
+        website = config.BOT_WEBSITE
+        profile_pic = self.bot.user.avatar_url
+        embeds: list[discord.Embed] = []
+        embed = discord.Embed(
+            title="Operators", url=website, color=0xFC8403)
+
+        embed.set_author(name=author_name, url=website, icon_url=profile_pic)
+        intro = "Here are the available operators listed"
+        embed.add_field(name="Intro", value=intro, inline=False)
+        or_ = "\
+            InclusiveOrOperator:\n\
+            \n\
+            Truth table:\n\
+            input_1, input_2, output.\n\
+            0, 0, 0.\n\
+            1, 0, 1.\n\
+            0, 1, 1.\n\
+            1, 1, 1.\n\
+            \n\
+            In English:\n\
+            Returns true if at least one input is true.\
+        "
+        embed.add_field(name="InclusiveOrOperator", value=or_, inline=False)
+        nor_ = "\
+            NotInclusiveOrOperator:\n\
+            \n\
+            Truth table:\n\
+            input_1, input_2, output.\n\
+            0, 0, 1.\n\
+            1, 0, 0.\n\
+            0, 1, 0.\n\
+            1, 1, 0.\n\
+            \n\
+            In English:\n\
+            Logical opposite of InclusiveOrOperator.\n\
+            That is to say, it always returns the opposite of InclusiveOrOperator.\n\
+            Only returns true if both inputs are false.\
+        "
+        embed.add_field(name="NotInclusiveOrOperator",
+                        value=nor_, inline=False)
+        and_ = "\
+            AndOperator:\n\
+            \n\
+            Truth table:\n\
+            input_1, input_2, output.\n\
+            0, 0, 0.\n\
+            1, 0, 0.\n\
+            0, 1, 0.\n\
+            1, 1, 1.\n\
+            \n\
+            In English:\n\
+            Only returns true if both inputs are true.\
+        "
+
+        embed.add_field(name="AndOperator",
+                        value=and_, inline=False)
+
+        nand_ = "\
+            NotAndOperator:\n\
+            \n\
+            Truth table:\n\
+            input_1, input_2, output.\n\
+            0, 0, 1.\n\
+            1, 0, 1.\n\
+            0, 1, 1.\n\
+            1, 1, 0.\n\
+            \n\
+            In English:\n\
+            Logical opposite of AndOperator.\n\
+            That is to say, it always returns the opposite of AndOperator.\n\
+            Returns true if either or both inputs are false.\
+        "
+
+        embed.add_field(name="NotAndOperator",
+                        value=nand_, inline=False)
+
+        xor_ = "\
+            ExclusiveOrOperator:\n\
+            \n\
+            Truth table:\n\
+            input_1, input_2, output.\n\
+            0, 0, 0.\n\
+            1, 0, 1.\n\
+            0, 1, 1.\n\
+            1, 1, 0.\n\
+            \n\
+            In English:\n\
+            Returns true if either but not both inputs are true.\n\
+            AKA returns true if the inputs are different.\n\
+        "
+
+        embed.add_field(name="ExclusiveOrOperator",
+                        value=xor_, inline=False)
+
+        nxor_ = "\
+            NotExclusiveOrOperator:\n\
+            \n\
+            Truth table:\n\
+            input_1, input_2, output.\n\
+            0, 0, 1.\n\
+            1, 0, 0.\n\
+            0, 1, 0.\n\
+            1, 1, 1.\n\
+            \n\
+            In English:\n\
+            Logical opposite of ExclusiveOrOperator.\n\
+            That is to say, it always returns the opposite of ExclusiveOrOperator.\n\
+            Returns true if both inputs are true or both inputs are false.\n\
+            AKA returns true if the inputs are the same.\n\
+        "
+
+        embed.add_field(name="NotExclusiveOrOperator",
+                        value=nxor_, inline=False)
+
+        await ctx.send(embed=embed)
+
+    def operators_brief_text(self, _: str) -> str:
+        return "Lists all the operators available in Patterns"
+
+    def operators_help_text(self, _: str) -> str:
+        return self.operators_brief_text(_)
+
+    @operators.error
+    async def operators_error(self, ctx: Context, error: CommandError) -> None:
+        if isinstance(error, commands.TooManyArguments):
+            await ctx.send("You gave this command arguments, even though it doesn't take any")
         else:
             raise error

@@ -90,6 +90,8 @@ def pattern_constructor(params: PatternParams) -> Component:
 
     """
     pattern = params.pattern
+    params.current_part = params.pattern
+    params.index_of_current_part = 0
     if not isinstance(pattern, str):
         raise PatternIsNotStrError
     pattern = pattern.lower().strip()
@@ -114,13 +116,21 @@ def pattern_constructor(params: PatternParams) -> Component:
         if len(words) == 2 and words[0].strip() == "not":
             params.current_part = words[1].strip()
             params.index_of_current_part = pattern.find(
-                params.current_part) + 1
+                params.current_part)
             return word_component_constructor(params, True)
         else:
+
             params.current_part = " ".join([word.strip() for word in words])
             params.index_of_current_part = pattern.find(
                 params.current_part)
-            return word_component_constructor(params, False)
+
+            try:
+                return word_component_constructor(params, False)
+            except NotValidSimpleComponentError:
+                if "," in params.current_part:
+                    raise StatementWithoutOpeningParenthesisError(
+                        params.pattern, params.index_of_current_part) from None
+
     if pattern[0] != "(":
         raise StatementWithoutOpeningParenthesisError(pattern, 0)
     if pattern[-1] != ")":
@@ -220,7 +230,6 @@ def statement_constructor(params: PatternParams) -> Statement:
     """
     current_part = params.current_part
     index_of_current_part = params.index_of_current_part
-
     current_part = current_part.strip()
     if current_part[0] != "(":
         raise StatementWithoutOpeningParenthesisError(
@@ -233,7 +242,17 @@ def statement_constructor(params: PatternParams) -> Statement:
     current_part = current_part[:-1]
     index_of_current_part += 1
     parts = current_part.split(",")
+    commasSinceLastParenthesis = 0
 
+    for index, char in enumerate(current_part):
+        index += index_of_current_part
+        if char == ")":
+            commasSinceLastParenthesis = 0
+        elif char == ",":
+            commasSinceLastParenthesis += 1
+        if commasSinceLastParenthesis > 2:
+            raise StatementWithoutOpeningParenthesisError(
+                params.pattern, index)
     if len(parts) < 3:
         raise TooFewCommasInStatementError(
             params.pattern, params.index_of_current_part + (len(params.current_part)/2) + 1)
@@ -247,8 +266,10 @@ def statement_constructor(params: PatternParams) -> Statement:
     else:
         component_1_str = parts[0].strip()
         index = parts[0].find(parts[0].strip())
-    params.current_part = component_1_str
+
     params.index_of_current_part += index
+    params.current_part = component_1_str
+
     component_1_first_index = params.index_of_current_part
     component_1_last_index = component_1_first_index + len(component_1_str) - 1
 
@@ -258,12 +279,16 @@ def statement_constructor(params: PatternParams) -> Statement:
     if current_part[-1] == ")":
         component_2_str = reverse_count_parentheses(params)
     else:
+
         component_2_str = parts[-1].strip()
-    params.current_part = component_2_str
+
     params.index_of_current_part += len(current_part) - \
         len(component_2_str)
+    params.current_part = component_2_str
+
     component_2_first_index = params.index_of_current_part
     component_2_last_index = component_2_first_index + len(component_2_str) - 1
+
     predicted_component_2_str = ""
     i = component_2_first_index
     while i <= component_2_last_index:
@@ -292,6 +317,9 @@ def component_constructor(params: PatternParams) -> Component:
     component = component.strip()
     if component[0] == "(":
         return statement_constructor(params)
+    if "," in component:
+        raise StatementWithoutOpeningParenthesisError(
+            params.pattern, params.index_of_current_part)
     words = component.split()
     # Count how many whitespaces get yeeted from the first word, since that affects index_of_current_part
     whitespaces = 0

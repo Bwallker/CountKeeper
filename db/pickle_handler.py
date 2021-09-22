@@ -4,6 +4,7 @@ from pattern_parts.components import *
 from pattern_parts.simple_component import *
 from pattern_parts.advanced_component import *
 from pattern_parts.operators import *
+from logs.log import print
 import pickle
 
 

@@ -18,7 +18,7 @@ def get_prefix(guild_id: int) -> str:
         guild_id = str(guild_id)
         cursor.execute(
             """SELECT prefix FROM prefixes WHERE guild_id = ?""", (guild_id,))
-        # cursor.fetchone() returns a touple containing one item
+        # cursor.fetchone() returns a tuple containing one item
         prefix = cursor.fetchone()
     except sqlite3.OperationalError:
         prefix = None

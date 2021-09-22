@@ -1,6 +1,7 @@
 from pattern_parser.simple_discord import create_simple_guild, SimpleGuild
 from pattern_parser.pattern import PatternParams
 from pattern_parser.pattern_error import PatternError
+import pattern_optimizer.optimizer as optimizer
 import discord
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot, command, Context
@@ -50,7 +51,7 @@ class CountingChannelsCommands(Cog):
         except PatternError as e:
             await ctx.send(e.__str__())
             return
-        #optimized_component = opt.optimize(unoptimized_component)
+        optimized_component = optimizer.optimize(unoptimized_component)
 
         channel = await guild.create_voice_channel(name)
         db.add_pattern(ctx.guild.id, channel.id, optimized_component)

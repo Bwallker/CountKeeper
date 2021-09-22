@@ -9,11 +9,6 @@ OPERATOR_MODULE = sys.modules[__name__]
 OPERATORS_REPR = {}
 
 
-class NoOpositeOperatorFoundError(Exception):
-    """
-        Exception raised if no oposite operator is found for an operator
-    """
-
 
 operator = TypeVar("operator", bound="Operator")
 
