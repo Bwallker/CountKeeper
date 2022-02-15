@@ -36,7 +36,7 @@ Well hold your breath, for here comes THE GLORIOUS SIMPLE PATTERN!!!
         @CoolKid
 
 
-Really, its that simple? All I have to do is ping the role I want to track?
+"Really, its that simple? All I have to do is ping the role I want to track?"
 Yes it is my friend. In fact, building any SimplePattern is just as simple. For example:
 
 If you want to create a pattern that tracks how many people in your server are bots, you write "bot" as your pattern.
