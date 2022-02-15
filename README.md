@@ -77,7 +77,7 @@ We can also put Statements inside of Statements, or nest them, as its sometimes 
 
     (> 3, and, (bot, not exclusive or, @Moderator))
  
-As you see, Statements can get pretty complicated pretty fast, but in the end they always consist of three parts. Two Components and an Operator.\n\
+As you see, Statements can get pretty complicated pretty fast, but in the end they always consist of three parts. Two Components and an Operator.
 
 NOTE: You can use the "statement" command for more info on statements
 
@@ -85,8 +85,8 @@ NOTE: You can use the "statement" command for more info on statements
 ## Summary
 
 To summarise:
-  1. You can use the \"components\", \"operators\" and \"statement\" commands to get more info.
-  2. You can also use the \"intro\" command to get this message again.
+  1. You can use the "components", "operators" and "statement" commands to get more info.
+  2. You can also use the "intro" command to get this message again.
   3. Patterns are the rules that you write, that tells the bot what a certain Counting Channel should keep track of.
   4. Simple Components are stupid simple.
   5. Advanced Components can get hard fast if you start nesting Statements, but if you avoid doing that they are pretty easy.
