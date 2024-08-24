@@ -75,6 +75,6 @@ class CountKeeper(Bot):
 
 
 if __name__ == '__main__':
-    init_logs.init()
+    # init_logs.init()
     keeper = CountKeeper()
     keeper.run(config.BOT_TOKEN)
