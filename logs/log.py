@@ -9,6 +9,7 @@ def print(message: str):
 
 
 def log(message: str):
+    pass
     # global PATH_TO_LOG_FILES
     # with open(f'{PATH_TO_LOG_FILES}/latest.log', 'a') as latest_log:
         # latest_log.write(f'{message}\n')
