@@ -1,3 +1,4 @@
+"""
 from utils import config
 from utils import std
 from os.path import join, isfile
@@ -91,3 +92,4 @@ def make_start_time_file_name_friendly(start_time: datetime) -> str:
         else:
             new_start_time += character
     return new_start_time
+"""
